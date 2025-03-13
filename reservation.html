@@ -20,7 +20,7 @@
             padding: 30px;
             border: 2px solid #022641;
             border-radius: 10px;
-            max-width: 600px;
+            max-width: 800px; /* Largeur augmentée pour 3 boutons par ligne */
             width: 100%;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
@@ -30,12 +30,15 @@
             margin-bottom: 20px;
         }
         .time-slot {
-            margin-bottom: 15px;
+            display: inline-block;
+            width: 30%; /* Trois boutons par ligne */
+            margin: 1%;
             text-align: center;
+            vertical-align: top;
         }
         .time-slot button {
-            background-color: #022641;
-            color: white;
+            background-color: white;
+            color: #022641;
             padding: 15px;
             border: 2px solid #022641;
             border-radius: 5px;
@@ -43,12 +46,11 @@
             width: 100%;
             font-size: 16px;
             margin-top: 10px;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
         .time-slot button:hover {
-            background-color: white;
-            color: #022641;
-            border-color: #022641;
+            background-color: #022641;
+            color: white;
         }
         .time-slot button.full {
             background-color: grey;
@@ -139,4 +141,3 @@
     </script>
 </body>
 </html>
-
