@@ -75,6 +75,11 @@
         </form>
     </div>
     <script>
+        // Fonction pour formater les heures
+        function formatTime(hour, minute) {
+            return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        }
+
         // Fonction pour générer les créneaux horaires
         function generateTimeSlots() {
             const form = document.getElementById('reservation-form');
@@ -85,22 +90,22 @@
                 const timeSlotRow = document.createElement('div');
                 timeSlotRow.className = 'time-slot-row';
 
-                if (startHour == 12) {
+                if (startHour === 12) {
                     // Sauter la pause déjeuner
                     startHour = 13;
                 }
 
                 for (let i = 0; i < 2; i++) { // Deux créneaux par itération
-                    const startTime = `${startHour + i * 0.5}:${i === 0 ? '00' : '30'}`;
-                    const endTime = `${startHour + i * 0.5 + 0.5}:${i === 0 ? '30' : '00'}`;
-                    const slotId = `slot-${startHour + i * 0.5}-${i === 0 ? '00' : '30'}`;
+                    const startMinute = i === 0 ? 0 : 30;
+                    const endMinute = i === 0 ? 30 : 0;
+                    const slotId = `slot-${startHour}-${startMinute}`;
 
                     const slotContainer = document.createElement('div');
                     slotContainer.className = 'time-slot';
                     slotContainer.setAttribute('data-max', '3');
                     slotContainer.setAttribute('data-count', '0');
                     slotContainer.innerHTML = `
-                        <button type="button" id="${slotId}" class="time-button">${startTime} - ${endTime}</button>
+                        <button type="button" id="${slotId}" class="time-button">${formatTime(startHour, startMinute)} - ${formatTime(startHour + (endMinute === 0 ? 1 : 0), endMinute)}</button>
                     `;
 
                     timeSlotRow.appendChild(slotContainer);
