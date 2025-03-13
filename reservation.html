@@ -65,6 +65,21 @@
             border-color: grey;
             color: white;
         }
+        .validation-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #022641;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        .validation-button:hover {
+            background-color: #d31444;
+        }
     </style>
 </head>
 <body>
@@ -73,6 +88,7 @@
         <form id="reservation-form">
             <!-- Les créneaux seront générés ici -->
         </form>
+        <button type="button" id="validate-button" class="validation-button" disabled>Je valide mon créneau</button>
     </div>
     <script>
         // Fonction pour formater les heures
@@ -121,6 +137,8 @@
         // Appeler la fonction pour générer les créneaux
         generateTimeSlots();
 
+        let selectedSlot = null;
+
         // JavaScript pour gérer la sélection des créneaux
         document.getElementById('reservation-form').addEventListener('click', function(event) {
             if (event.target.classList.contains('time-button')) {
@@ -129,14 +147,43 @@
                 const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
 
                 if (currentCount < maxCount) {
-                    slotContainer.setAttribute('data-count', currentCount + 1);
-                    if (currentCount + 1 >= maxCount) {
-                        event.target.classList.add('full');
+                    // Désélectionner un créneau précédemment sélectionné
+                    if (selectedSlot) {
+                        selectedSlot.classList.remove('selected');
                     }
-                    alert('Créneau réservé avec succès !');
+
+                    // Sélectionner le nouveau créneau
+                    selectedSlot = event.target;
+                    selectedSlot.classList.add('selected');
+
+                    // Activer le bouton de validation
+                    document.getElementById('validate-button').disabled = false;
                 } else {
                     alert('Ce créneau est complet.');
                 }
+            }
+        });
+
+        // JavaScript pour gérer la validation du créneau
+        document.getElementById('validate-button').addEventListener('click', function() {
+            if (selectedSlot) {
+                const slotContainer = selectedSlot.parentElement;
+                const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
+                const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
+
+                if (currentCount < maxCount) {
+                    slotContainer.setAttribute('data-count', currentCount + 1);
+                    if (currentCount + 1 >= maxCount) {
+                        selectedSlot.classList.add('full');
+                    }
+                    alert('Créneau réservé avec succès !');
+                    // Désactiver le bouton de validation après réservation
+                    document.getElementById('validate-button').disabled = true;
+                } else {
+                    alert('Ce créneau est complet.');
+                }
+            } else {
+                alert('Veuillez sélectionner un créneau.');
             }
         });
     </script>
