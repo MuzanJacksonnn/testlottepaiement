@@ -57,19 +57,44 @@
     <div class="container">
         <h1>Réservation de Créneaux</h1>
         <form id="reservation-form">
-            <div class="time-slot" data-max="3" data-count="0">
-                <input type="checkbox" id="slot-1" name="time-slot" value="9:00-9:30">
-                <label for="slot-1">9:00 - 9:30</label>
-            </div>
-            <div class="time-slot" data-max="3" data-count="0">
-                <input type="checkbox" id="slot-2" name="time-slot" value="9:30-10:00">
-                <label for="slot-2">9:30 - 10:00</label>
-            </div>
-            <!-- Ajouter plus de créneaux ici -->
-            <button type="submit">Réserver</button>
+            <!-- Les créneaux seront générés ici -->
         </form>
     </div>
     <script>
+        // Fonction pour générer les créneaux horaires
+        function generateTimeSlots() {
+            const form = document.getElementById('reservation-form');
+            let time = 9; // Heure de début
+            const endTime = 18; // Heure de fin
+
+            while (time < endTime) {
+                if (time >= 12 && time < 13) {
+                    // Sauter la pause déjeuner
+                    time = 13;
+                    continue;
+                }
+
+                const startTime = `${time}:00`;
+                const endTime = `${time}:30`;
+                const slotId = `slot-${time}`;
+
+                const slotContainer = document.createElement('div');
+                slotContainer.className = 'time-slot';
+                slotContainer.setAttribute('data-max', '3');
+                slotContainer.setAttribute('data-count', '0');
+                slotContainer.innerHTML = `
+                    <input type="checkbox" id="${slotId}" name="time-slot" value="${startTime}-${endTime}">
+                    <label for="${slotId}">${startTime} - ${endTime}</label>
+                `;
+
+                form.appendChild(slotContainer);
+                time += 0.5; // Passer au créneau suivant
+            }
+        }
+
+        // Appeler la fonction pour générer les créneaux
+        generateTimeSlots();
+
         // JavaScript pour gérer la sélection des créneaux
         document.getElementById('reservation-form').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -95,3 +120,4 @@
     </script>
 </body>
 </html>
+
