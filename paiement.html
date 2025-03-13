@@ -120,7 +120,7 @@
         const inclusionProduits = urlParams.get('inclusion_produits');
         
         // Définir le montant en fonction des choix
-        let amount = 2;
+        let amount = 600;
         if (inclusionProduits === 'Oui') {
             amount = 800;  // 600€ base + 200€ pour l'inclusion des produits
             document.getElementById('payment-amount').textContent = '800,00 €';
