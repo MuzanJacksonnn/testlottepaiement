@@ -65,6 +65,10 @@
             border-color: grey;
             color: white;
         }
+        .time-slot button.selected {
+            background-color: #d31444;
+            color: white;
+        }
         .validation-button {
             display: block;
             margin: 20px auto;
@@ -179,6 +183,9 @@
                     alert('Créneau réservé avec succès !');
                     // Désactiver le bouton de validation après réservation
                     document.getElementById('validate-button').disabled = true;
+                    // Réinitialiser la sélection
+                    selectedSlot.classList.remove('selected');
+                    selectedSlot = null;
                 } else {
                     alert('Ce créneau est complet.');
                 }
