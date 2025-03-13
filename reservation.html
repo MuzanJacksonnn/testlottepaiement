@@ -64,19 +64,18 @@
         // Fonction pour générer les créneaux horaires
         function generateTimeSlots() {
             const form = document.getElementById('reservation-form');
-            let time = 9; // Heure de début
-            const endTime = 18; // Heure de fin
+            let startHour = 9; // Heure de début
+            const endHour = 18; // Heure de fin
 
-            while (time < endTime) {
-                if (time >= 12 && time < 13) {
+            while (startHour < endHour) {
+                if (startHour == 12) {
                     // Sauter la pause déjeuner
-                    time = 13;
-                    continue;
+                    startHour = 13;
                 }
 
-                const startTime = `${time}:00`;
-                const endTime = `${time}:30`;
-                const slotId = `slot-${time}`;
+                const startTime = `${startHour}:00`;
+                const endTime = `${startHour}:30`;
+                const slotId = `slot-${startHour}-00`;
 
                 const slotContainer = document.createElement('div');
                 slotContainer.className = 'time-slot';
@@ -88,7 +87,23 @@
                 `;
 
                 form.appendChild(slotContainer);
-                time += 0.5; // Passer au créneau suivant
+
+                const nextStartTime = `${startHour}:30`;
+                const nextEndTime = `${startHour + 1}:00`;
+                const nextSlotId = `slot-${startHour}-30`;
+
+                const nextSlotContainer = document.createElement('div');
+                nextSlotContainer.className = 'time-slot';
+                nextSlotContainer.setAttribute('data-max', '3');
+                nextSlotContainer.setAttribute('data-count', '0');
+                nextSlotContainer.innerHTML = `
+                    <input type="checkbox" id="${nextSlotId}" name="time-slot" value="${nextStartTime}-${nextEndTime}">
+                    <label for="${nextSlotId}">${nextStartTime} - ${nextEndTime}</label>
+                `;
+
+                form.appendChild(nextSlotContainer);
+
+                startHour += 1; // Passer à l'heure suivante
             }
         }
 
@@ -120,4 +135,3 @@
     </script>
 </body>
 </html>
-
