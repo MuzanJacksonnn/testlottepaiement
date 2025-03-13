@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merci pour votre inscription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .thankyou-container {
+            background-color: #fff;
+            padding: 30px;
+            border: 2px solid #022641; /* Bleu foncé de votre entreprise */
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+        }
+        h1 {
+            color: #022641; /* Titre en bleu foncé comme demandé */
+            margin-bottom: 20px;
+        }
+        .logo-container {
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            max-width: 300px;
+            height: auto;
+        }
+        p {
+            color: #022641; /* Texte en bleu foncé */
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #d31444; /* Bouton en rouge de votre entreprise */
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #b01138; /* Version plus foncée au survol */
+        }
+        .thankyou-container:before {
+            content: '';
+            display: block;
+            height: 8px; /* Épaisseur augmentée */
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -30px -30px 20px -30px;
+            border-radius: 8px 8px 0 0;
+        }
+        .thankyou-container:after {
+            content: '';
+            display: block;
+            height: 8px; /* Même épaisseur que la bande supérieure */
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -30px -30px -30px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+        @media (max-width: 600px) {
+            .thankyou-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            body {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+            .logo-container img {
+                max-width: 220px;
+            }
+            .thankyou-container:before {
+                margin: -20px -20px 20px -20px;
+            }
+            .thankyou-container:after {
+                margin: 20px -20px -20px -20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="thankyou-container">
+        <h1>Merci pour votre inscription !</h1>
+        <div class="logo-container">
+            <!-- Remplacez "votre-logo.png" par le chemin vers votre logo -->
+            <img src="new logo.jpg" alt="Logo de l'entreprise">
+        </div>
+        <p>Votre inscription au Buyer Meeting Lotte a été enregistrée avec succès. Nous vous contacterons bientôt pour plus de détails.</p>
+        <button onclick="window.location.href='/'">Retour au formulaire</button>
+    </div>
+</body>
+</html>
