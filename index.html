@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <script src="https://www.paypal.com/sdk/js?client-id=AS98Y_IcGhbHjnlMwNJQddvNbcGDdqkWgYK8xNfMR2txTkTHpg_iwKigg6HsFa8Gg7c8J9bcuyaGRECA&currency=EUR"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription Buyer Meeting Lotte</title>
@@ -221,10 +220,9 @@ document.getElementById('buyer-meeting').addEventListener('submit', function(eve
     .then(data => {
         console.log('Réponse du serveur:', data);
         if (data.result === 'success') {
-            // Petite pause pour le confort visuel, puis redirection
-            setTimeout(() => {
-                window.location.href = '/merci.html';
-            }, 1000); // Délai réduit à 1 seconde
+            // Redirection vers la page de paiement avec les informations sur l'inclusion des produits
+            const inclusionProduits = document.querySelector('input[name="inclusion_produits"]:checked').value;
+            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
         } else {
             throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
         }
@@ -236,31 +234,5 @@ document.getElementById('buyer-meeting').addEventListener('submit', function(eve
     });
 });
     </script>
-    <div id="paypal-button-container"></div>
-
-<script>
-    paypal.Buttons({
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: '600.00'  // Montant en euros
-                    }
-                }]
-            });
-        },
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                alert('Paiement effectué avec succès par ' + details.payer.name.given_name);
-                window.location.href = '/merci.html';  // Redirection après paiement
-            });
-        },
-        onError: function(err) {
-            console.error(err);
-            alert('Une erreur est survenue lors du paiement.');
-        }
-    }).render('#paypal-button-container');
-</script>
-
 </body>
 </html>
