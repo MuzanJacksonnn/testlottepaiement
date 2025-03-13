@@ -29,12 +29,15 @@
             color: #022641;
             margin-bottom: 20px;
         }
+        .time-slot-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
         .time-slot {
-            display: inline-block;
-            width: 30%; /* Trois boutons par ligne */
-            margin: 1%;
+            flex: 1;
+            margin: 5px;
             text-align: center;
-            vertical-align: top;
         }
         .time-slot button {
             background-color: white;
@@ -45,7 +48,6 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
-            margin-top: 10px;
             transition: background-color 0.3s, color 0.3s;
         }
         .time-slot button:hover {
@@ -80,39 +82,31 @@
             const endHour = 18; // Heure de fin
 
             while (startHour < endHour) {
+                const timeSlotRow = document.createElement('div');
+                timeSlotRow.className = 'time-slot-row';
+
                 if (startHour == 12) {
                     // Sauter la pause déjeuner
                     startHour = 13;
                 }
 
-                const startTime = `${startHour}:00`;
-                const endTime = `${startHour}:30`;
-                const slotId = `slot-${startHour}-00`;
+                for (let i = 0; i < 2; i++) { // Deux créneaux par itération
+                    const startTime = `${startHour + i * 0.5}:${i === 0 ? '00' : '30'}`;
+                    const endTime = `${startHour + i * 0.5 + 0.5}:${i === 0 ? '30' : '00'}`;
+                    const slotId = `slot-${startHour + i * 0.5}-${i === 0 ? '00' : '30'}`;
 
-                const slotContainer = document.createElement('div');
-                slotContainer.className = 'time-slot';
-                slotContainer.setAttribute('data-max', '3');
-                slotContainer.setAttribute('data-count', '0');
-                slotContainer.innerHTML = `
-                    <button type="button" id="${slotId}" class="time-button">${startTime} - ${endTime}</button>
-                `;
+                    const slotContainer = document.createElement('div');
+                    slotContainer.className = 'time-slot';
+                    slotContainer.setAttribute('data-max', '3');
+                    slotContainer.setAttribute('data-count', '0');
+                    slotContainer.innerHTML = `
+                        <button type="button" id="${slotId}" class="time-button">${startTime} - ${endTime}</button>
+                    `;
 
-                form.appendChild(slotContainer);
+                    timeSlotRow.appendChild(slotContainer);
+                }
 
-                const nextStartTime = `${startHour}:30`;
-                const nextEndTime = `${startHour + 1}:00`;
-                const nextSlotId = `slot-${startHour}-30`;
-
-                const nextSlotContainer = document.createElement('div');
-                nextSlotContainer.className = 'time-slot';
-                nextSlotContainer.setAttribute('data-max', '3');
-                nextSlotContainer.setAttribute('data-count', '0');
-                nextSlotContainer.innerHTML = `
-                    <button type="button" id="${nextSlotId}" class="time-button">${nextStartTime} - ${nextEndTime}</button>
-                `;
-
-                form.appendChild(nextSlotContainer);
-
+                form.appendChild(timeSlotRow);
                 startHour += 1; // Passer à l'heure suivante
             }
         }
