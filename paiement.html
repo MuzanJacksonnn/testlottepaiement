@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script src="https://www.paypal.com/sdk/js?client-id=AS98Y_IcGhbHjnlMwNJQddvNbcGDdqkWgYK8xNfMR2txTkTHpg_iwKigg6HsFa8Gg7c8J9bcuyaGRECA&currency=EUR"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Merci - Buyer Meeting Lotte</title>
+    <title>Paiement - Buyer Meeting Lotte</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,7 +16,7 @@
             align-items: center;
             min-height: 100vh;
         }
-        .thank-you-container {
+        .payment-container {
             background-color: #fff;
             padding: 30px;
             border: 2px solid #022641;
@@ -24,12 +25,11 @@
             width: 100%;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             position: relative;
-            text-align: center;
         }
         h1 {
             text-align: center;
             color: #022641;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .logo-container {
             text-align: center;
@@ -39,12 +39,16 @@
             max-width: 300px;
             height: auto;
         }
-        .confirmation-message {
-            font-size: 18px;
+        .summary {
             margin-bottom: 30px;
-            line-height: 1.6;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
         }
-        .thank-you-container:before {
+        .payment-options {
+            margin-top: 30px;
+        }
+        .payment-container:before {
             content: '';
             display: block;
             height: 8px;
@@ -52,7 +56,7 @@
             margin: -30px -30px 20px -30px;
             border-radius: 8px 8px 0 0;
         }
-        .thank-you-container:after {
+        .payment-container:after {
             content: '';
             display: block;
             height: 8px;
@@ -61,31 +65,19 @@
             border-radius: 0 0 8px 8px;
             position: relative;
         }
-        .info-detail {
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
+        #amount-display {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #022641;
+        }
+        .payment-message {
+            text-align: center;
             margin-bottom: 20px;
         }
-        .home-button {
-            background-color: #d31444;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            display: inline-block;
-            text-decoration: none;
-            margin-top: 20px;
-        }
-        .home-button:hover {
-            background-color: #b01138;
-        }
         @media (max-width: 600px) {
-            .thank-you-container {
+            .payment-container {
                 padding: 20px;
                 margin: 15px;
             }
@@ -96,32 +88,65 @@
             .logo-container img {
                 max-width: 220px;
             }
-            .thank-you-container:before {
+            .payment-container:before {
                 margin: -20px -20px 20px -20px;
             }
-            .thank-you-container:after {
+            .payment-container:after {
                 margin: 20px -20px -20px -20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="thank-you-container">
-        <h1>Merci pour votre paiement!</h1>
+    <div class="payment-container">
+        <h1>Paiement - Buyer Meeting Lotte</h1>
         <div class="logo-container">
             <img src="new logo.jpg" alt="Logo de l'entreprise">
         </div>
         
-        <div class="confirmation-message">
-            <p>Votre inscription et votre paiement pour le Buyer Meeting Lotte ont été confirmés avec succès.</p>
+        <div class="payment-message">
+            <p>Merci pour votre inscription! Veuillez procéder au paiement pour finaliser votre participation.</p>
         </div>
         
-        <div class="info-detail">
-            <p>Vous recevrez prochainement un email de confirmation avec tous les détails concernant l'événement du 13 mai 2025 à Paris.</p>
-            <p>Pour toute question, n'hésitez pas à nous contacter.</p>
-        </div>
+        <div id="amount-display">Montant: <span id="payment-amount">600,00 €</span></div>
         
-        <a href="index.html" class="home-button">Retour à l'accueil</a>
+        <div id="paypal-button-container"></div>
     </div>
+
+    <script>
+        // Récupérer les paramètres d'URL pour savoir si l'option de 200€ a été choisie
+        const urlParams = new URLSearchParams(window.location.search);
+        const inclusionProduits = urlParams.get('inclusion_produits');
+        
+        // Définir le montant en fonction des choix
+        let amount = 600;
+        if (inclusionProduits === 'Oui') {
+            amount = 800;  // 600€ base + 200€ pour l'inclusion des produits
+            document.getElementById('payment-amount').textContent = '800,00 €';
+        }
+
+        // Configuration du bouton PayPal
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: amount.toString()  // Montant en euros
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    // Redirection après paiement réussi
+                    window.location.href = '/merci.html';
+                });
+            },
+            onError: function(err) {
+                console.error(err);
+                alert('Une erreur est survenue lors du paiement.');
+            }
+        }).render('#paypal-button-container');
+    </script>
 </body>
 </html>
