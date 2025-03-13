@@ -31,11 +31,9 @@
         }
         .time-slot {
             margin-bottom: 15px;
+            text-align: center;
         }
-        .time-slot input {
-            margin-right: 10px;
-        }
-        button {
+        .time-slot button {
             background-color: #d31444;
             color: white;
             padding: 12px 20px;
@@ -44,11 +42,10 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
+            margin-top: 10px;
         }
-        .time-slot.full {
-            color: grey;
-        }
-        .time-slot.full input {
+        .time-slot button.full {
+            background-color: grey;
             pointer-events: none;
         }
     </style>
@@ -82,8 +79,7 @@
                 slotContainer.setAttribute('data-max', '3');
                 slotContainer.setAttribute('data-count', '0');
                 slotContainer.innerHTML = `
-                    <input type="checkbox" id="${slotId}" name="time-slot" value="${startTime}-${endTime}">
-                    <label for="${slotId}">${startTime} - ${endTime}</label>
+                    <button type="button" id="${slotId}" class="time-button">${startTime} - ${endTime}</button>
                 `;
 
                 form.appendChild(slotContainer);
@@ -97,8 +93,7 @@
                 nextSlotContainer.setAttribute('data-max', '3');
                 nextSlotContainer.setAttribute('data-count', '0');
                 nextSlotContainer.innerHTML = `
-                    <input type="checkbox" id="${nextSlotId}" name="time-slot" value="${nextStartTime}-${nextEndTime}">
-                    <label for="${nextSlotId}">${nextStartTime} - ${nextEndTime}</label>
+                    <button type="button" id="${nextSlotId}" class="time-button">${nextStartTime} - ${nextEndTime}</button>
                 `;
 
                 form.appendChild(nextSlotContainer);
@@ -111,25 +106,21 @@
         generateTimeSlots();
 
         // JavaScript pour gérer la sélection des créneaux
-        document.getElementById('reservation-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const selectedSlot = document.querySelector('input[name="time-slot"]:checked');
-            if (selectedSlot) {
-                const slotContainer = selectedSlot.parentElement;
+        document.getElementById('reservation-form').addEventListener('click', function(event) {
+            if (event.target.classList.contains('time-button')) {
+                const slotContainer = event.target.parentElement;
                 const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
                 const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
 
                 if (currentCount < maxCount) {
                     slotContainer.setAttribute('data-count', currentCount + 1);
                     if (currentCount + 1 >= maxCount) {
-                        slotContainer.classList.add('full');
+                        event.target.classList.add('full');
                     }
                     alert('Créneau réservé avec succès !');
                 } else {
                     alert('Ce créneau est complet.');
                 }
-            } else {
-                alert('Veuillez sélectionner un créneau.');
             }
         });
     </script>
