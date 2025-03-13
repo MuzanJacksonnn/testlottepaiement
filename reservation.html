@@ -45,17 +45,23 @@
             width: 100%;
             font-size: 16px;
         }
+        .time-slot.full {
+            color: grey;
+        }
+        .time-slot.full input {
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Réservation de Créneaux</h1>
         <form id="reservation-form">
-            <div class="time-slot">
+            <div class="time-slot" data-max="3" data-count="0">
                 <input type="checkbox" id="slot-1" name="time-slot" value="9:00-9:30">
                 <label for="slot-1">9:00 - 9:30</label>
             </div>
-            <div class="time-slot">
+            <div class="time-slot" data-max="3" data-count="0">
                 <input type="checkbox" id="slot-2" name="time-slot" value="9:30-10:00">
                 <label for="slot-2">9:30 - 10:00</label>
             </div>
@@ -67,8 +73,24 @@
         // JavaScript pour gérer la sélection des créneaux
         document.getElementById('reservation-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            // Logique pour gérer la réservation
-            alert('Créneau réservé avec succès !');
+            const selectedSlot = document.querySelector('input[name="time-slot"]:checked');
+            if (selectedSlot) {
+                const slotContainer = selectedSlot.parentElement;
+                const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
+                const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
+
+                if (currentCount < maxCount) {
+                    slotContainer.setAttribute('data-count', currentCount + 1);
+                    if (currentCount + 1 >= maxCount) {
+                        slotContainer.classList.add('full');
+                    }
+                    alert('Créneau réservé avec succès !');
+                } else {
+                    alert('Ce créneau est complet.');
+                }
+            } else {
+                alert('Veuillez sélectionner un créneau.');
+            }
         });
     </script>
 </body>
