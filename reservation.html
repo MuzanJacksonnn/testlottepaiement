@@ -104,8 +104,10 @@
                     slotContainer.className = 'time-slot';
                     slotContainer.setAttribute('data-max', '3');
                     slotContainer.setAttribute('data-count', '0');
+
+                    const currentHour = startHour + (endMinute === 0 ? 1 : 0);
                     slotContainer.innerHTML = `
-                        <button type="button" id="${slotId}" class="time-button">${formatTime(startHour, startMinute)} - ${formatTime(startHour + (endMinute === 0 ? 1 : 0), endMinute)}</button>
+                        <button type="button" id="${slotId}" class="time-button">${formatTime(startHour, startMinute)} - ${formatTime(currentHour, endMinute)}</button>
                     `;
 
                     timeSlotRow.appendChild(slotContainer);
