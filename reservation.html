@@ -5,7 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réservation de Créneaux</title>
     <style>
-        /* Ajoute ici les styles CSS précédents */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border: 2px solid #022641;
+            border-radius: 10px;
+            max-width: 800px; /* Largeur augmentée pour 3 boutons par ligne */
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #022641;
+            margin-bottom: 20px;
+        }
+        .time-slot-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .time-slot {
+            flex: 1;
+            margin: 5px;
+            text-align: center;
+        }
+        .time-slot button {
+            background-color: white;
+            color: #022641;
+            padding: 15px;
+            border: 2px solid #022641;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .time-slot button:hover {
+            background-color: #022641;
+            color: white;
+        }
+        .time-slot button.full {
+            background-color: grey;
+            border-color: grey;
+            color: white;
+            pointer-events: none;
+        }
+        .time-slot button.full:hover {
+            background-color: grey;
+            border-color: grey;
+            color: white;
+        }
+        .time-slot button.selected {
+            background-color: #d31444;
+            color: white;
+        }
+        .validation-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #022641;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        .validation-button:hover {
+            background-color: #d31444;
+        }
     </style>
     <script src="https://apis.google.com/js/api.js"></script>
 </head>
@@ -122,7 +200,6 @@
 
         // Fonction pour enregistrer dans Google Sheets
         function saveToGoogleSheet(timeSlot) {
-            // Remplace par ton ID de client OAuth 2.0
             const CLIENT_ID = '28775012084-bgbm343p1vdcu5btidndqb4fq3n8fvmi.apps.googleusercontent.com';
             const API_KEY = 'AIzaSyDnHtjDyvTlFz7ulG_4lUnAwUMktJau4zU';
             const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
@@ -145,7 +222,7 @@
             }
 
             function appendToSheet(timeSlot) {
-                const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio'; // Remplace par l'ID de ton Google Sheet
+                const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio'; // ID de ta Google Sheet
                 const range = 'Sheet2!A:B'; // Assure-toi que 'Sheet2' est le nom de la deuxième feuille
 
                 gapi.client.sheets.spreadsheets.values.append({
