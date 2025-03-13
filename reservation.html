@@ -4,87 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réservation de Créneaux</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border: 2px solid #022641;
-            border-radius: 10px;
-            max-width: 800px; /* Largeur augmentée pour 3 boutons par ligne */
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #022641;
-            margin-bottom: 20px;
-        }
-        .time-slot-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-        .time-slot {
-            flex: 1;
-            margin: 5px;
-            text-align: center;
-        }
-        .time-slot button {
-            background-color: white;
-            color: #022641;
-            padding: 15px;
-            border: 2px solid #022641;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .time-slot button:hover {
-            background-color: #022641;
-            color: white;
-        }
-        .time-slot button.full {
-            background-color: grey;
-            border-color: grey;
-            color: white;
-            pointer-events: none;
-        }
-        .time-slot button.full:hover {
-            background-color: grey;
-            border-color: grey;
-            color: white;
-        }
-        .time-slot button.selected {
-            background-color: #d31444;
-            color: white;
-        }
-        .validation-button {
-            display: block;
-            margin: 20px auto;
-            background-color: #022641;
-            color: white;
-            padding: 15px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background-color 0.3s;
-        }
-        .validation-button:hover {
-            background-color: #d31444;
-        }
-    </style>
     <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
@@ -95,28 +14,24 @@
         </form>
         <button type="button" id="validate-button" class="validation-button" disabled>Je valide mon créneau</button>
     </div>
+
     <script>
-        // Fonction pour formater les heures
         function formatTime(hour, minute) {
             return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
         }
 
-        // Fonction pour générer les créneaux horaires
         function generateTimeSlots() {
             const form = document.getElementById('reservation-form');
-            let startHour = 9; // Heure de début
-            const endHour = 18; // Heure de fin
+            let startHour = 9;
+            const endHour = 18;
 
             while (startHour < endHour) {
                 const timeSlotRow = document.createElement('div');
                 timeSlotRow.className = 'time-slot-row';
 
-                if (startHour === 12) {
-                    // Sauter la pause déjeuner
-                    startHour = 13;
-                }
+                if (startHour === 12) startHour = 13;
 
-                for (let i = 0; i < 2; i++) { // Deux créneaux par itération
+                for (let i = 0; i < 2; i++) {
                     const startMinute = i === 0 ? 0 : 30;
                     const endMinute = i === 0 ? 30 : 0;
                     const slotId = `slot-${startHour}-${startMinute}`;
@@ -133,112 +48,86 @@
 
                     timeSlotRow.appendChild(slotContainer);
                 }
-
                 form.appendChild(timeSlotRow);
-                startHour += 1; // Passer à l'heure suivante
+                startHour++;
             }
         }
 
-        // Appeler la fonction pour générer les créneaux
         generateTimeSlots();
 
         let selectedSlot = null;
 
-        // JavaScript pour gérer la sélection des créneaux
         document.getElementById('reservation-form').addEventListener('click', function(event) {
             if (event.target.classList.contains('time-button')) {
-                const slotContainer = event.target.parentElement;
-                const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
-                const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
-
-                if (currentCount < maxCount) {
-                    // Désélectionner un créneau précédemment sélectionné
-                    if (selectedSlot) {
-                        selectedSlot.classList.remove('selected');
-                    }
-
-                    // Sélectionner le nouveau créneau
-                    selectedSlot = event.target;
-                    selectedSlot.classList.add('selected');
-
-                    // Activer le bouton de validation
-                    document.getElementById('validate-button').disabled = false;
-                } else {
-                    alert('Ce créneau est complet.');
-                }
+                if (selectedSlot) selectedSlot.classList.remove('selected');
+                selectedSlot = event.target;
+                selectedSlot.classList.add('selected');
+                document.getElementById('validate-button').disabled = false;
             }
         });
 
-        // JavaScript pour gérer la validation du créneau
         document.getElementById('validate-button').addEventListener('click', function() {
-            if (selectedSlot) {
-                const slotContainer = selectedSlot.parentElement;
-                const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
-                const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
+            if (!selectedSlot) return alert('Veuillez sélectionner un créneau.');
 
-                if (currentCount < maxCount) {
-                    slotContainer.setAttribute('data-count', currentCount + 1);
-                    if (currentCount + 1 >= maxCount) {
-                        selectedSlot.classList.add('full');
-                    }
-                    alert('Créneau réservé avec succès !');
-                    // Désactiver le bouton de validation après réservation
-                    document.getElementById('validate-button').disabled = true;
-                    // Réinitialiser la sélection
-                    selectedSlot.classList.remove('selected');
-                    selectedSlot = null;
+            const slotContainer = selectedSlot.parentElement;
+            const currentCount = parseInt(slotContainer.getAttribute('data-count'));
+            const maxCount = parseInt(slotContainer.getAttribute('data-max'));
 
-                    // Appeler la fonction pour enregistrer dans Google Sheets
-                    saveToGoogleSheet(selectedSlot.textContent);
-                } else {
-                    alert('Ce créneau est complet.');
-                }
+            if (currentCount < maxCount) {
+                slotContainer.setAttribute('data-count', currentCount + 1);
+                if (currentCount + 1 >= maxCount) selectedSlot.classList.add('full');
+                saveToGoogleSheet(selectedSlot.textContent);
+                alert('Créneau réservé avec succès !');
+                document.getElementById('validate-button').disabled = true;
+                selectedSlot.classList.remove('selected');
+                selectedSlot = null;
             } else {
-                alert('Veuillez sélectionner un créneau.');
+                alert('Ce créneau est complet.');
             }
         });
 
-        // Fonction pour enregistrer dans Google Sheets
         function saveToGoogleSheet(timeSlot) {
             const CLIENT_ID = '28775012084-bgbm343p1vdcu5btidndqb4fq3n8fvmi.apps.googleusercontent.com';
             const API_KEY = 'AIzaSyDnHtjDyvTlFz7ulG_4lUnAwUMktJau4zU';
             const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
-            const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+            const SCOPES = "https://www.googleapis.com/auth/spreadsheets.append";
 
-            // Charge la bibliothèque client Google API
-            gapi.load('client:auth2', initClient);
-
-            function initClient() {
+            gapi.load('client:auth2', () => {
                 gapi.client.init({
                     apiKey: API_KEY,
                     clientId: CLIENT_ID,
                     discoveryDocs: DISCOVERY_DOCS,
                     scope: SCOPES
-                }).then(function () {
-                    gapi.auth2.getAuthInstance().signIn().then(function() {
-                        appendToSheet(timeSlot);
-                    });
+                }).then(() => {
+                    return gapi.auth2.getAuthInstance().signIn();
+                }).then(() => {
+                    appendToSheet(timeSlot);
+                }).catch((error) => {
+                    console.error('Erreur d\'authentification :', error);
+                    alert('Erreur d\'authentification Google.');
                 });
-            }
+            });
 
             function appendToSheet(timeSlot) {
-                const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio'; // ID de ta Google Sheet
-                const range = 'Sheet2!A:B'; // Assure-toi que 'Sheet2' est le nom de la deuxième feuille
+                const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio';
+                const range = 'Sheet2!A:B';
 
                 gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: spreadsheetId,
-                    range: range,
+                    spreadsheetId,
+                    range,
                     valueInputOption: 'RAW',
                     resource: {
                         values: [[new Date().toISOString(), timeSlot]]
                     }
-                }).then(function(response) {
+                }).then((response) => {
                     console.log('Réservation ajoutée :', response.result);
-                }, function(response) {
-                    console.error('Erreur :', response.result.error.message);
+                }).catch((error) => {
+                    console.error('Erreur d\'ajout :', error);
+                    alert('Erreur lors de l\'ajout à Google Sheets.');
                 });
             }
         }
     </script>
 </body>
 </html>
+
