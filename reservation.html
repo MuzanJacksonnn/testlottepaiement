@@ -5,13 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réservation de Créneaux</title>
     <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border: 2px solid #022641;
+            border-radius: 10px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #022641;
+            margin-bottom: 20px;
+        }
+        .time-slot-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        .time-slot {
+            flex: 1;
+            margin: 5px;
+            text-align: center;
+        }
+        .time-slot button {
+            background-color: white;
+            color: #022641;
+            padding: 15px;
+            border: 2px solid #022641;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .time-slot button:hover {
+            background-color: #022641;
+            color: white;
+        }
+        .time-slot button.full {
+            background-color: grey;
+            border-color: grey;
+            color: white;
+            pointer-events: none;
+        }
+        .validation-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #022641;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .validation-button:hover {
+            background-color: #d31444;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Réservation de Créneaux</h1>
-        <form id="reservation-form">
-            <!-- Les créneaux seront générés ici -->
-        </form>
+        <form id="reservation-form"></form>
         <button type="button" id="validate-button" class="validation-button" disabled>Je valide mon créneau</button>
     </div>
 
@@ -29,8 +98,6 @@
                 const timeSlotRow = document.createElement('div');
                 timeSlotRow.className = 'time-slot-row';
 
-                if (startHour === 12) startHour = 13;
-
                 for (let i = 0; i < 2; i++) {
                     const startMinute = i === 0 ? 0 : 30;
                     const endMinute = i === 0 ? 30 : 0;
@@ -38,14 +105,7 @@
 
                     const slotContainer = document.createElement('div');
                     slotContainer.className = 'time-slot';
-                    slotContainer.setAttribute('data-max', '3');
-                    slotContainer.setAttribute('data-count', '0');
-
-                    const currentHour = startHour + (endMinute === 0 ? 1 : 0);
-                    slotContainer.innerHTML = `
-                        <button type="button" id="${slotId}" class="time-button">${formatTime(startHour, startMinute)} - ${formatTime(currentHour, endMinute)}</button>
-                    `;
-
+                    slotContainer.innerHTML = `<button type="button" id="${slotId}" class="time-button">${formatTime(startHour, startMinute)} - ${formatTime(startHour + (endMinute === 0 ? 1 : 0), endMinute)}</button>`;
                     timeSlotRow.appendChild(slotContainer);
                 }
                 form.appendChild(timeSlotRow);
@@ -68,22 +128,8 @@
 
         document.getElementById('validate-button').addEventListener('click', function() {
             if (!selectedSlot) return alert('Veuillez sélectionner un créneau.');
-
-            const slotContainer = selectedSlot.parentElement;
-            const currentCount = parseInt(slotContainer.getAttribute('data-count'));
-            const maxCount = parseInt(slotContainer.getAttribute('data-max'));
-
-            if (currentCount < maxCount) {
-                slotContainer.setAttribute('data-count', currentCount + 1);
-                if (currentCount + 1 >= maxCount) selectedSlot.classList.add('full');
-                saveToGoogleSheet(selectedSlot.textContent);
-                alert('Créneau réservé avec succès !');
-                document.getElementById('validate-button').disabled = true;
-                selectedSlot.classList.remove('selected');
-                selectedSlot = null;
-            } else {
-                alert('Ce créneau est complet.');
-            }
+            saveToGoogleSheet(selectedSlot.textContent);
+            alert('Créneau réservé avec succès !');
         });
 
         function saveToGoogleSheet(timeSlot) {
@@ -101,33 +147,10 @@
                 }).then(() => {
                     return gapi.auth2.getAuthInstance().signIn();
                 }).then(() => {
-                    appendToSheet(timeSlot);
-                }).catch((error) => {
-                    console.error('Erreur d\'authentification :', error);
-                    alert('Erreur d\'authentification Google.');
-                });
-            });
-
-            function appendToSheet(timeSlot) {
-                const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio';
-                const range = 'Sheet2!A:B';
-
-                gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId,
-                    range,
-                    valueInputOption: 'RAW',
-                    resource: {
-                        values: [[new Date().toISOString(), timeSlot]]
-                    }
-                }).then((response) => {
-                    console.log('Réservation ajoutée :', response.result);
-                }).catch((error) => {
-                    console.error('Erreur d\'ajout :', error);
-                    alert('Erreur lors de l\'ajout à Google Sheets.');
-                });
-            }
-        }
-    </script>
-</body>
-</html>
-
+                    const spreadsheetId = '1prrF-r9e__1SiVI7-9XSCtgcsov6Fuq-haxalQHflio';
+                    const range = 'Sheet2!A:B';
+                    return gapi.client.sheets.spreadsheets.values.append({
+                        spreadsheetId,
+                        range,
+                        valueInputOption: 'RAW',
+                        resource
