@@ -37,20 +37,29 @@
             background-color: #022641;
             color: white;
             padding: 15px;
-            border: none;
+            border: 2px solid #022641;
             border-radius: 5px;
             cursor: pointer;
             width: 100%;
             font-size: 16px;
             margin-top: 10px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, border-color 0.3s;
         }
         .time-slot button:hover {
-            background-color: #d31444;
+            background-color: white;
+            color: #022641;
+            border-color: #022641;
         }
         .time-slot button.full {
             background-color: grey;
+            border-color: grey;
+            color: white;
             pointer-events: none;
+        }
+        .time-slot button.full:hover {
+            background-color: grey;
+            border-color: grey;
+            color: white;
         }
     </style>
 </head>
@@ -130,3 +139,4 @@
     </script>
 </body>
 </html>
+
