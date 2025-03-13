@@ -6,10 +6,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription Buyer Meeting Lotte</title>
     <style>
-        /* Vos styles existants ici */
-        #paypal-button-container {
-            display: none; /* Cacher le bouton PayPal au départ */
-            margin-top: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 30px;
+            border: 2px solid #022641;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            text-align: center;
+            color: #022641;
+            margin-bottom: 10px;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            max-width: 300px;
+            height: auto;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #022641;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #022641;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            border: 2px solid #d31444;
+            outline: none;
+        }
+        input[type="file"] {
+            padding: 3px;
+        }
+        button {
+            background-color: #d31444;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #b01138;
+        }
+        .radio-group {
+            display: flex;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        .radio-group label {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #fff;
+            border: 1px solid #022641;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-weight: normal;
+            margin: 0;
+            text-align: center;
+            transition: all 0.2s ease;
+            color: #022641;
+        }
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        .radio-group input[type="radio"]:checked + label {
+            background-color: #022641;
+            color: white;
+            border-color: #022641;
+        }
+        .form-container:before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -30px -30px 20px -30px;
+            border-radius: 8px 8px 0 0;
+        }
+        .form-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -30px -30px -30px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            body {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+            .logo-container img {
+                max-width: 220px;
+            }
+            .form-container:before {
+                margin: -20px -20px 20px -20px;
+            }
+            .form-container:after {
+                margin: 20px -20px -20px -20px;
+            }
         }
     </style>
 </head>
@@ -32,63 +161,84 @@
             <input type="tel" name="telephone" required>
             <label>Type de produits commercialisés :</label>
             <input type="text" name="type_produits" required>
+            <label>Disposez-vous d'un importateur/distributeur en Corée ?</label>
+            <div class="radio-group">
+                <input type="radio" id="importateur-oui" name="importateur_distributeur" value="Oui" required>
+                <label for="importateur-oui">Oui</label>
+                <input type="radio" id="importateur-non" name="importateur_distributeur" value="Non" required>
+                <label for="importateur-non">Non</label>
+            </div>
+            <label>Nom de l'importateur/distributeur en Corée (le cas échéant) :</label>
+            <input type="text" name="nom_importateur">
+            <label>Télécharger la présentation de l'entreprise :</label>
+            <input type="file" name="presentation_entreprise">
+            <label>Confirmez votre disponibilité pour l'événement du 13 mai 2025 à Paris :</label>
+            <div class="radio-group">
+                <input type="radio" id="disponibilite-oui" name="disponibilite_event" value="Oui" required>
+                <label for="disponibilite-oui">Oui</label>
+                <input type="radio" id="disponibilite-non" name="disponibilite_event" value="Non" required>
+                <label for="disponibilite-non">Non</label>
+            </div>
+            <label>Souhaitez-vous inclure vos produits dans la présentation en direct organisée par Lotte ? (Un supplément de 200 euros sera appliqué pour cette option.)</label>
+            <div class="radio-group">
+                <input type="radio" id="inclusion-oui" name="inclusion_produits" value="Oui" required>
+                <label for="inclusion-oui">Oui</label>
+                <input type="radio" id="inclusion-non" name="inclusion_produits" value="Non" required>
+                <label for="inclusion-non">Non</label>
+            </div>
             <button type="submit">Envoyer</button>
         </form>
-
-        <!-- Bouton PayPal caché au départ -->
-        <div id="paypal-button-container"></div>
     </div>
-
     <div id="loading-screen" style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.8);
-        justify-content: center;
-        align-items: center;
-        font-size: 20px;
-        font-weight: bold;
-        color: #022641;">
-        ⏳ Envoi en cours, veuillez patienter...
-    </div>
-
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #022641;">
+    ⏳ Envoi en cours, veuillez patienter...
+</div>
     <script>
-    document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
-        event.preventDefault(); // Empêche l'envoi classique du formulaire
+document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
+    event.preventDefault(); // Empêche l'envoi classique du formulaire
 
-        // Afficher l'écran de chargement
-        document.getElementById('loading-screen').style.display = 'flex';
+    // Afficher immédiatement l'écran de chargement
+    document.getElementById('loading-screen').style.display = 'flex';
 
-        var formData = new FormData(event.target);
+    var formData = new FormData(event.target);
 
-        fetch(event.target.action, {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Réponse du serveur:', data);
-            if (data.result === 'success') {
-                // Cacher le formulaire et afficher le bouton PayPal
-                document.getElementById('buyer-meeting').style.display = 'none';
-                document.getElementById('paypal-button-container').style.display = 'block';
-            } else {
-                throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur réseau ou serveur:', error);
-            alert('Une erreur est survenue. Vérifiez votre connexion ou réessayez plus tard.');
-        })
-        .finally(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-        });
+    fetch(event.target.action, {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Réponse du serveur:', data);
+        if (data.result === 'success') {
+            // Petite pause pour le confort visuel, puis redirection
+            setTimeout(() => {
+                window.location.href = '/merci.html';
+            }, 1000); // Délai réduit à 1 seconde
+        } else {
+            throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur réseau ou serveur:', error);
+        alert('Une erreur est survenue. Vérifiez votre connexion ou réessayez plus tard.');
+        document.getElementById('loading-screen').style.display = 'none'; // Cacher l'écran en cas d'erreur
     });
+});
+    </script>
+    <div id="paypal-button-container"></div>
 
-    // Configuration du bouton PayPal
+<script>
     paypal.Buttons({
         createOrder: function(data, actions) {
             return actions.order.create({
@@ -110,6 +260,7 @@
             alert('Une erreur est survenue lors du paiement.');
         }
     }).render('#paypal-button-container');
-    </script>
+</script>
+
 </body>
 </html>
