@@ -54,6 +54,22 @@
             font-weight: bold;
         }
     </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "TON_API_KEY",
+        authDomain: "TON_AUTH_DOMAIN",
+        projectId: "TON_PROJECT_ID",
+        storageBucket: "TON_STORAGE_BUCKET",
+        messagingSenderId: "TON_MESSAGING_SENDER_ID",
+        appId: "TON_APP_ID",
+        databaseURL: "TON_DATABASE_URL"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+</script>
 </head>
 <body>
     <div class="reservation-container">
