@@ -203,6 +203,37 @@
     color: #022641;">
     ⏳ Envoi en cours, veuillez patienter...
 </div>
+     <script>
+document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
+    event.preventDefault(); // Empêche l'envoi classique du formulaire
+
+    // Afficher immédiatement l'écran de chargement
+    document.getElementById('loading-screen').style.display = 'flex';
+
+    var formData = new FormData(event.target);
+
+    fetch(event.target.action, {
+        method: 'POST',
+        body: formData,
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Réponse du serveur:', data);
+        if (data.result === 'success') {
+            // Redirection vers la page de paiement avec les informations sur l'inclusion des produits
+            const inclusionProduits = document.querySelector('input[name="inclusion_produits"]:checked').value;
+            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
+        } else {
+            throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur réseau ou serveur:', error);
+        alert('Une erreur est survenue. Vérifiez votre connexion ou réessayez plus tard.');
+        document.getElementById('loading-screen').style.display = 'none'; // Cacher l'écran en cas d'erreur
+    });
+});
+    </script>
    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
