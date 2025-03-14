@@ -137,17 +137,34 @@
                     }]
                 });
             },
-            onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    // Redirection après paiement réussi
-                    window.location.href = '/reservation.html';
-                });
-            },
-            onError: function(err) {
-                console.error(err);
-                alert('Une erreur est survenue lors du paiement.');
-            }
-        }).render('#paypal-button-container');
+onApprove: function(data, actions) {
+    return actions.order.capture().then(function(details) {
+        // Envoyer la confirmation du paiement à Google Sheets
+        const email = urlParams.get('email'); // Récupérer l'email depuis l'URL
+        // Envoi des données de paiement au script
+        fetch('https://script.google.com/macros/s/AKfycbzzfGezwuf6tF3HQ4s0tkXbIubF0MbzZxr40ly05U7u08H0rpAiyfg05FX5V_v6NLUn/exec', {
+            method: 'POST',
+            body: new URLSearchParams({
+                'action': 'payment_confirmation',
+                'email': email,
+                'payment_id': details.id,
+                'amount': amount
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Redirection après paiement réussi
+            window.location.href = '/merci.html?email=' + encodeURIComponent(email);
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Paiement enregistré mais une erreur est survenue lors de la mise à jour de votre dossier.');
+            window.location.href = '/merci.html';
+        });
+    });
+}
+
+        
     </script>
 </body>
 </html>
