@@ -46,7 +46,9 @@
                 <tr>
                     <th>Créneau horaire</th>
                     <th>Nom de l'entreprise</th>
+                    <th>Nom complet</th>
                     <th>Email</th>
+                    <th>Téléphone</th>
                     <th>Type de produits</th>
                 </tr>
             </thead>
@@ -91,24 +93,22 @@
                 if (bookings) {
                     // Parcourir chaque créneau
                     for (const timeSlot in bookings) {
-                        const reservations = bookings[timeSlot];
+                        const reservation = bookings[timeSlot];
 
-                        // Log pour chaque créneau
-                        console.log("Créneau :", timeSlot, "Réservations :", reservations);
+                        console.log("Créneau :", timeSlot, "Réservation :", reservation);
 
-                        // Parcourir chaque réservation
-                        reservations.forEach(reservation => {
-                            const row = document.createElement('tr');
+                        const row = document.createElement('tr');
 
-                            // Ajouter les informations du créneau et de l'entreprise dans le tableau
-                            row.innerHTML = `
-                                <td>${timeSlot}</td>
-                                <td>${reservation.nom_entreprise || 'N/A'}</td>
-                                <td>${reservation.email || 'N/A'}</td>
-                                <td>${reservation.type_produits || 'N/A'}</td>
-                            `;
-                            planningTableBody.appendChild(row);
-                        });
+                        // Ajouter les informations du créneau et de l'entreprise dans le tableau
+                        row.innerHTML = `
+                            <td>${timeSlot}</td>
+                            <td>${reservation.nom_entreprise || 'N/A'}</td>
+                            <td>${reservation.nom_complet || 'N/A'}</td>
+                            <td>${reservation.email || 'N/A'}</td>
+                            <td>${reservation.telephone || 'N/A'}</td>
+                            <td>${reservation.type_produits || 'N/A'}</td>
+                        `;
+                        planningTableBody.appendChild(row);
                     }
                 } else {
                     console.log("Aucune réservation trouvée.");
@@ -121,3 +121,4 @@
     </script>
 </body>
 </html>
+
