@@ -69,56 +69,20 @@
             width: 100%;
             font-size: 16px;
             font-weight: bold;
-            transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #b01138;
-        }
-        .radio-group {
-            display: flex;
-            margin-bottom: 15px;
-            gap: 10px;
-        }
-        .radio-group label {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #fff;
-            border: 1px solid #022641;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-            font-weight: normal;
-            margin: 0;
-            text-align: center;
-            transition: all 0.2s ease;
-            color: #022641;
-        }
-        .radio-group input[type="radio"] {
-            display: none;
-        }
-        .radio-group input[type="radio"]:checked + label {
-            background-color: #022641;
-            color: white;
-            border-color: #022641;
+        .form-container:before, .form-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            border-radius: 8px;
         }
         .form-container:before {
-            content: '';
-            display: block;
-            height: 8px;
             background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
             margin: -30px -30px 20px -30px;
-            border-radius: 8px 8px 0 0;
         }
         .form-container:after {
-            content: '';
-            display: block;
-            height: 8px;
             background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
             margin: 20px -30px -30px -30px;
-            border-radius: 0 0 8px 8px;
-            position: relative;
         }
         @media (max-width: 600px) {
             .form-container {
@@ -147,92 +111,70 @@
         <div class="logo-container">
             <img src="new logo.jpg" alt="Logo de l'entreprise">
         </div>
-        <form id="buyer-meeting" method="POST" action="https://script.google.com/macros/s/AKfycbxGC9brPK5-CYMI3TNYzmzCz4UvG71K6Oy5Ly3SW2G4C5HWaMKMsjgdPuHXd5vd5t1g/exec">
+        <form id="buyer-meeting" method="POST">
             <label>Nom complet :</label>
-            <input type="text" name="nom_complet" required>
+            <input type="text" id="nom_complet" name="nom_complet" required>
             <label>Nom de l'entreprise :</label>
-            <input type="text" name="nom_entreprise" required>
+            <input type="text" id="nom_entreprise" name="nom_entreprise" required>
             <label>Nom de la marque :</label>
-            <input type="text" name="nom_marque" required>
+            <input type="text" id="nom_marque" name="nom_marque" required>
             <label>Adresse e-mail du responsable :</label>
-            <input type="email" name="email" required>
+            <input type="email" id="email" name="email" required>
             <label>Numéro de téléphone :</label>
-            <input type="tel" name="telephone" required>
-            <label>Type de produits commercialisés :</label>
-            <input type="text" name="type_produits" required>
-            <label>Disposez-vous d'un importateur/distributeur en Corée ?</label>
-            <div class="radio-group">
-                <input type="radio" id="importateur-oui" name="importateur_distributeur" value="Oui" required>
-                <label for="importateur-oui">Oui</label>
-                <input type="radio" id="importateur-non" name="importateur_distributeur" value="Non" required>
-                <label for="importateur-non">Non</label>
-            </div>
-            <label>Nom de l'importateur/distributeur en Corée (le cas échéant) :</label>
-            <input type="text" name="nom_importateur">
-            <label>Télécharger la présentation de l'entreprise :</label>
-            <input type="file" name="presentation_entreprise">
-            <label>Confirmez votre disponibilité pour l'événement du 13 mai 2025 à Paris :</label>
-            <div class="radio-group">
-                <input type="radio" id="disponibilite-oui" name="disponibilite_event" value="Oui" required>
-                <label for="disponibilite-oui">Oui</label>
-                <input type="radio" id="disponibilite-non" name="disponibilite_event" value="Non" required>
-                <label for="disponibilite-non">Non</label>
-            </div>
-            <label>Souhaitez-vous inclure vos produits dans la présentation en direct organisée par Lotte ? (Un supplément de 200 euros sera appliqué pour cette option.)</label>
-            <div class="radio-group">
-                <input type="radio" id="inclusion-oui" name="inclusion_produits" value="Oui" required>
-                <label for="inclusion-oui">Oui</label>
-                <input type="radio" id="inclusion-non" name="inclusion_produits" value="Non" required>
-                <label for="inclusion-non">Non</label>
-            </div>
-            <button type="submit">Envoyer</button>
+            <input type="tel" id="telephone" name="telephone" required>
+            <label>Type de produits :</label>
+            <input type="text" id="type_produits" name="type_produits" required>
+            <label>Importateur/Distributeur :</label>
+            <select id="importateur_distributeur" name="importateur_distributeur" required>
+                <option value="">Sélectionnez</option>
+                <option value="Importateur">Importateur</option>
+                <option value="Distributeur">Distributeur</option>
+            </select>
+            <label>Nom de l'importateur :</label>
+            <input type="text" id="nom_importateur" name="nom_importateur">
+            <label>Disponibilité pour l'événement :</label>
+            <input type="text" id="disponibilite_event" name="disponibilite_event" required>
+            <label>Inclusion de produits :</label>
+            <textarea id="inclusion_produits" name="inclusion_produits" required></textarea>
+            <label>Choisissez un créneau horaire :</label>
+            <input type="text" id="timeSlot" name="timeSlot" required>
+            <button type="submit">Soumettre</button>
         </form>
     </div>
-    <div id="loading-screen" style="
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.8);
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    font-weight: bold;
-    color: #022641;">
-    ⏳ Envoi en cours, veuillez patienter...
-</div>
+
     <script>
-document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
-    event.preventDefault(); // Empêche l'envoi classique du formulaire
+        document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-    // Afficher immédiatement l'écran de chargement
-    document.getElementById('loading-screen').style.display = 'flex';
+            var formData = {
+                nom_complet: document.getElementById('nom_complet').value,
+                nom_entreprise: document.getElementById('nom_entreprise').value,
+                nom_marque: document.getElementById('nom_marque').value,
+                email: document.getElementById('email').value,
+                telephone: document.getElementById('telephone').value,
+                type_produits: document.getElementById('type_produits').value,
+                importateur_distributeur: document.getElementById('importateur_distributeur').value,
+                nom_importateur: document.getElementById('nom_importateur').value,
+                disponibilite_event: document.getElementById('disponibilite_event').value,
+                inclusion_produits: document.getElementById('inclusion_produits').value,
+                timeSlot: document.getElementById('timeSlot').value
+            };
 
-    var formData = new FormData(event.target);
-
-    fetch(event.target.action, {
-        method: 'POST',
-        body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Réponse du serveur:', data);
-        if (data.result === 'success') {
-            // Redirection vers la page de paiement avec les informations sur l'inclusion des produits
-            const inclusionProduits = document.querySelector('input[name="inclusion_produits"]:checked').value;
-            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
-        } else {
-            throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur réseau ou serveur:', error);
-        alert('Une erreur est survenue. Vérifiez votre connexion ou réessayez plus tard.');
-        document.getElementById('loading-screen').style.display = 'none'; // Cacher l'écran en cas d'erreur
-    });
-});
+            fetch('YOUR_WEB_APP_URL', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
     </script>
 </body>
 </html>
