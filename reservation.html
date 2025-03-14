@@ -18,40 +18,68 @@
         </select>
         <button id="submit-booking">Réserver</button>
     </div>
-    
+
+    <h2>Créneaux réservés :</h2>
+    <ul id="booked-slots"></ul>
+
     <!-- Option 1: Utiliser Firebase v9 avec la syntaxe de modules (recommandé) -->
     <script type="module">
-        // Import des fonctions Firebase nécessaires
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-        
+        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
         // Configuration Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
-            authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
+           apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+            authDomain: "TON_PROJECT_ID.firebaseapp.com",
             databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "lotte-buyer-meeting-9c929",
             storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
             messagingSenderId: "791634146132",
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
-        
+
         // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
-        
+
+        // Fonction pour récupérer et afficher les créneaux réservés
+        function loadBookedSlots() {
+            const bookedSlotsRef = ref(database, 'bookings/');
+            get(bookedSlotsRef).then((snapshot) => {
+                const bookings = snapshot.val();
+                const bookedSlotsList = document.getElementById('booked-slots');
+                bookedSlotsList.innerHTML = '';  // Efface les créneaux existants avant d'afficher les nouveaux
+
+                // Affiche les créneaux réservés
+                for (const timeSlot in bookings) {
+                    const count = bookings[timeSlot];
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `${timeSlot} - Réservé par ${count} entreprise(s)`;
+                    bookedSlotsList.appendChild(listItem);
+                }
+            }).catch((error) => {
+                console.error("Erreur lors de la récupération des créneaux réservés :", error);
+            });
+        }
+
+        // Charge les créneaux réservés quand la page est chargée
+        document.addEventListener('DOMContentLoaded', loadBookedSlots);
+
         // Événement sur le bouton de réservation
         document.getElementById('submit-booking').addEventListener('click', function() {
             const timeSlot = document.getElementById('time-slot').value;
             const timeSlotRef = ref(database, 'bookings/' + timeSlot);
-            
+
             // Vérifier les réservations existantes
             get(timeSlotRef).then((snapshot) => {
                 const bookings = snapshot.val() || 0;
                 if (bookings < 3) {
                     // Ajouter une réservation
                     set(timeSlotRef, bookings + 1)
-                        .then(() => alert("Réservation confirmée pour le créneau " + timeSlot))
+                        .then(() => {
+                            alert("Réservation confirmée pour le créneau " + timeSlot);
+                            loadBookedSlots();  // Recharge la liste des créneaux réservés
+                        })
                         .catch(error => alert("Erreur lors de la réservation : " + error.message));
                 } else {
                     alert("Désolé, le créneau est complet !");
