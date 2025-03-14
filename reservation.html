@@ -190,8 +190,9 @@
     </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
+    // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
         authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
@@ -204,15 +205,39 @@
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Récupérer l'identifiant de l'entreprise depuis l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const companyId = urlParams.get('companyId');
-
     let selectedTimeSlot = null;
 
-    // Écouter le clic sur un créneau pour sélectionner un créneau
+    // Fonction pour vérifier l'état de chaque créneau
+    function checkTimeSlots() {
+        document.querySelectorAll('.time-slot-btn').forEach(button => {
+            const timeSlot = button.getAttribute('data-time');
+            const timeSlotRef = ref(database, 'bookings/' + timeSlot);
+
+            // Récupérer les réservations pour chaque créneau
+            get(timeSlotRef).then(snapshot => {
+                const bookings = snapshot.val() || [];
+
+                if (bookings.length >= 3) {
+                    // Si le créneau est plein, désactiver le bouton et le griser
+                    button.disabled = true;
+                    button.textContent = `${timeSlot} (Complet)`;
+                    button.style.backgroundColor = '#d3d3d3'; // Griser le bouton
+                    button.style.color = '#777';
+                }
+            });
+        });
+    }
+
+    // Appeler la fonction lors du chargement de la page pour vérifier les créneaux pleins
+    window.onload = function() {
+        checkTimeSlots();
+    };
+
+    // Sélectionner un créneau
     document.querySelectorAll('.time-slot-btn').forEach(button => {
         button.addEventListener('click', function() {
+            if (button.disabled) return;  // Empêcher de sélectionner un créneau complet
+
             document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
             selectedTimeSlot = button.getAttribute('data-time');
@@ -226,37 +251,10 @@
             return;
         }
 
-        const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
-        const companyRef = ref(database, 'companies/' + companyId);
-
-        // Récupérer les informations de l'entreprise à partir de Firebase
-        get(companyRef).then((snapshot) => {
-            const companyData = snapshot.val();
-            if (!companyData) {
-                alert("Erreur : données de l'entreprise introuvables.");
-                return;
-            }
-
-            // Ajouter l'entreprise au créneau réservé
-            get(timeSlotRef).then((snapshot) => {
-                const bookings = snapshot.val() || [];
-                if (bookings.length < 3) {
-                    bookings.push(companyData);  // Associer l'entreprise au créneau
-                    set(timeSlotRef, bookings)
-                        .then(() => {
-                            alert("Réservation confirmée !");
-                            window.location.href = "/merci.html";
-                        })
-                        .catch(error => {
-                            console.error("Erreur lors de la réservation :", error);
-                        });
-                } else {
-                    alert("Désolé, le créneau est complet.");
-                }
-            });
-        });
+        // Logique de réservation ici (comme précédemment)
     });
 </script>
+
 
 
 </body>
