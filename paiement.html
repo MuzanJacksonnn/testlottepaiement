@@ -140,7 +140,9 @@
             onApprove: function(data, actions) {
                 return actions.order.capture().then(function(details) {
                     // Redirection après paiement réussi
-                    window.location.href = '/merci.html';
+                   // Après paiement réussi, redirige vers la page de réservation des créneaux
+                    window.location.href = '/reservation.html?companyId=' + companyId;
+
                 });
             },
             onError: function(err) {
