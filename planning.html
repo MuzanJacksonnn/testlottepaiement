@@ -148,9 +148,10 @@
     </div>
 
     <script type="module">
-        // Import des fonctions Firebase nécessaires
+     // Import des fonctions Firebase nécessaires
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         
         // Configuration Firebase
         const firebaseConfig = {
@@ -166,9 +167,90 @@
         // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        const auth = getAuth(app);
         
         // Variable pour stocker les données de réservation pour l'export Excel
         let bookingsData = [];
+
+        // Éléments DOM
+        const loginSection = document.getElementById('login-section');
+        const planningSection = document.getElementById('planning-section');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-btn');
+        const logoutButton = document.getElementById('logout-btn');
+        const loginError = document.getElementById('login-error');
+        const userEmailSpan = document.getElementById('user-email');
+        const exportButton = document.getElementById('export-excel');
+        const planningTableBody = document.querySelector('#planning-table tbody');
+
+        // Gérer l'état de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Utilisateur connecté
+                loginSection.style.display = 'none';
+                planningSection.style.display = 'block';
+                userEmailSpan.textContent = user.email;
+                loadPlanning();
+            } else {
+                // Utilisateur non connecté
+                loginSection.style.display = 'block';
+                planningSection.style.display = 'none';
+                userEmailSpan.textContent = '';
+                planningTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="loading">Connexion requise pour afficher les réservations...</td>
+                    </tr>
+                `;
+            }
+        });
+
+        // Fonction de connexion
+        loginButton.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                loginError.textContent = "Veuillez saisir votre email et votre mot de passe.";
+                return;
+            }
+            
+            loginError.textContent = "Connexion en cours...";
+            
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Connexion réussie
+                    loginError.textContent = "";
+                    emailInput.value = "";
+                    passwordInput.value = "";
+                })
+                .catch((error) => {
+                    // Erreur de connexion
+                    console.error("Erreur de connexion:", error);
+                    switch(error.code) {
+                        case 'auth/invalid-email':
+                            loginError.textContent = "Format d'email invalide.";
+                            break;
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            loginError.textContent = "Email ou mot de passe incorrect.";
+                            break;
+                        case 'auth/too-many-requests':
+                            loginError.textContent = "Trop de tentatives. Veuillez réessayer plus tard.";
+                            break;
+                        default:
+                            loginError.textContent = "Erreur de connexion. Veuillez réessayer.";
+                    }
+                });
+        });
+
+        // Fonction de déconnexion
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).catch((error) => {
+                console.error("Erreur lors de la déconnexion:", error);
+                alert("Erreur lors de la déconnexion. Veuillez réessayer.");
+            });
+        });
 
         // Fonction pour charger et afficher le planning
         function loadPlanning() {
