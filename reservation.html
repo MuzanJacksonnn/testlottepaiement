@@ -1,76 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Réservation des créneaux</title>
+    <title>Réservation des créneaux - Lotte Buyer Meeting</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f1f1f1;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
         }
         .form-container {
-            background-color: white;
+            background-color: #fff;
             padding: 30px;
             border: 2px solid #022641;
             border-radius: 10px;
-            width: 350px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
             text-align: center;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
         }
         h1 {
+            text-align: center;
             color: #022641;
-            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .logo-container img {
+            max-width: 300px;
+            height: auto;
+        }
+        .date-selection {
             margin-bottom: 20px;
         }
         label {
-            font-size: 16px;
-            color: #022641;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #022641;
         }
-        select, input[type="date"] {
+        input[type="date"] {
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #ccc;
+            border: 1px solid #022641;
             border-radius: 5px;
-            font-size: 16px;
-            background-color: #f9f9f9;
+            box-sizing: border-box;
         }
-        button {
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        .time-slot-btn {
+            flex: 0 0 calc(25% - 10px);
+            background-color: #fff;
+            border: 1px solid #022641;
+            border-radius: 5px;
+            padding: 12px 10px;
+            cursor: pointer;
+            font-weight: normal;
+            text-align: center;
+            transition: all 0.2s ease;
+            color: #022641;
+            font-size: 14px;
+        }
+        .time-slot-btn.selected {
+            background-color: #022641;
+            color: white;
+            border-color: #022641;
+        }
+        button#submit-booking {
             background-color: #d31444;
             color: white;
-            padding: 12px;
+            padding: 12px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            width: 100%;
             font-size: 16px;
             font-weight: bold;
-            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 15px;
         }
-        button:hover {
+        button#submit-booking:hover {
             background-color: #b01138;
+        }
+        .form-container:before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -30px -30px 20px -30px;
+            border-radius: 8px 8px 0 0;
+        }
+        .form-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -30px -30px -30px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+        #loading-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #022641;
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            body {
+                align-items: flex-start;
+                padding: 20px 0;
+            }
+            .time-slot-btn {
+                flex: 0 0 calc(33.33% - 10px);
+            }
+            .form-container:before {
+                margin: -20px -20px 20px -20px;
+            }
+            .form-container:after {
+                margin: 20px -20px -20px -20px;
+            }
+        }
+        @media (max-width: 400px) {
+            .time-slot-btn {
+                flex: 0 0 calc(50% - 10px);
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Réservez un créneau</h1>
+    <div class="form-container">
+        <h1>Réservation des créneaux</h1>
+        <div class="logo-container">
+            <img src="new logo.jpg" alt="Logo Lotte Buyer Meeting">
+        </div>
+        
+        <div class="date-selection">
+            <label for="meeting-date">Sélectionnez une date :</label>
+            <input type="date" id="meeting-date" value="2025-05-13" min="2025-05-13" max="2025-05-13">
+        </div>
+        
+        <label>Choisissez un créneau horaire :</label>
+        <div class="time-slots" id="time-slots">
+            <button class="time-slot-btn" data-time="09:00">09:00 - 09:30</button>
+            <button class="time-slot-btn" data-time="09:30">09:30 - 10:00</button>
+            <button class="time-slot-btn" data-time="10:00">10:00 - 10:30</button>
+            <button class="time-slot-btn" data-time="10:30">10:30 - 11:00</button>
+            <button class="time-slot-btn" data-time="11:00">11:00 - 11:30</button>
+            <button class="time-slot-btn" data-time="11:30">11:30 - 12:00</button>
+            <button class="time-slot-btn" data-time="14:00">14:00 - 14:30</button>
+            <button class="time-slot-btn" data-time="14:30">14:30 - 15:00</button>
+            <button class="time-slot-btn" data-time="15:00">15:00 - 15:30</button>
+            <button class="time-slot-btn" data-time="15:30">15:30 - 16:00</button>
+            <button class="time-slot-btn" data-time="16:00">16:00 - 16:30</button>
+            <button class="time-slot-btn" data-time="16:30">16:30 - 17:00</button>
+            <button class="time-slot-btn" data-time="17:00">17:00 - 17:30</button>
+            <button class="time-slot-btn" data-time="17:30">17:30 - 18:00</button>
+        </div>
 
-    <div class="time-slots" id="time-slots">
-        <button class="time-slot-btn" data-time="9:00">09:00</button>
-        <button class="time-slot-btn" data-time="9:30">09:30</button>
-        <button class="time-slot-btn" data-time="10:00">10:00</button>
-        <!-- Ajoutez d'autres créneaux ici -->
-        <button class="time-slot-btn" data-time="17:30">17:30</button>
+        <button id="submit-booking">Réserver ce créneau</button>
     </div>
-
-    <button id="submit-booking">Réserver</button>
+    
+    <div id="loading-screen">
+        ⏳ Traitement de votre réservation, veuillez patienter...
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -78,7 +197,7 @@
         
         const firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
-            authDomain: "TON_PROJECT_ID.firebaseapp.com",
+            authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
             databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "lotte-buyer-meeting-9c929",
             storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
@@ -86,18 +205,51 @@
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
 
+        // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
         let selectedTimeSlot = null;
 
+        // Fonction pour vérifier la disponibilité des créneaux au chargement
+        async function checkAvailability() {
+            const timeSlotButtons = document.querySelectorAll('.time-slot-btn');
+            
+            for (const button of timeSlotButtons) {
+                const timeSlot = button.getAttribute('data-time');
+                const timeSlotRef = ref(database, 'bookings/' + timeSlot);
+                
+                try {
+                    const snapshot = await get(timeSlotRef);
+                    const bookings = snapshot.val() || 0;
+                    
+                    if (bookings >= 3) {
+                        button.disabled = true;
+                        button.style.backgroundColor = '#f1f1f1';
+                        button.style.color = '#999';
+                        button.style.cursor = 'not-allowed';
+                        button.style.borderColor = '#ccc';
+                        button.innerHTML = timeSlot.substring(0, 5) + ' <br><small>Complet</small>';
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la vérification du créneau", timeSlot, error);
+                }
+            }
+        }
+
         // Ajouter un événement de sélection pour chaque bouton de créneau
         document.querySelectorAll('.time-slot-btn').forEach(button => {
-            button.addEventListener('click', function () {
+            button.addEventListener('click', function() {
+                if (button.disabled) return;
+                
                 // Désélectionner les autres boutons
-                document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
+                document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                
                 // Sélectionner ce bouton
                 button.classList.add('selected');
+                
                 // Récupérer la valeur du créneau
                 selectedTimeSlot = button.getAttribute('data-time');
             });
@@ -110,6 +262,10 @@
                 return;
             }
 
+            // Afficher l'écran de chargement
+            document.getElementById('loading-screen').style.display = 'flex';
+            
+            const selectedDate = document.getElementById('meeting-date').value;
             const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
 
             // Vérifier les réservations existantes
@@ -118,17 +274,42 @@
                 if (bookings < 3) {
                     // Ajouter une réservation
                     set(timeSlotRef, bookings + 1)
-                        .then(() => alert("Réservation confirmée pour le créneau " + selectedTimeSlot))
-                        .catch(error => alert("Erreur lors de la réservation : " + error.message));
+                        .then(() => {
+                            document.getElementById('loading-screen').style.display = 'none';
+                            alert("Réservation confirmée pour le " + selectedDate + " à " + selectedTimeSlot);
+                            // Marquer le créneau comme complet si nécessaire
+                            if (bookings + 1 >= 3) {
+                                const selectedButton = document.querySelector(`.time-slot-btn[data-time="${selectedTimeSlot}"]`);
+                                selectedButton.disabled = true;
+                                selectedButton.style.backgroundColor = '#f1f1f1';
+                                selectedButton.style.color = '#999';
+                                selectedButton.style.cursor = 'not-allowed';
+                                selectedButton.style.borderColor = '#ccc';
+                                selectedButton.innerHTML = selectedTimeSlot.substring(0, 5) + ' <br><small>Complet</small>';
+                            }
+                            // Réinitialiser la sélection
+                            selectedTimeSlot = null;
+                            document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                                btn.classList.remove('selected');
+                            });
+                        })
+                        .catch(error => {
+                            document.getElementById('loading-screen').style.display = 'none';
+                            alert("Erreur lors de la réservation : " + error.message);
+                        });
                 } else {
+                    document.getElementById('loading-screen').style.display = 'none';
                     alert("Désolé, le créneau est complet !");
                 }
             }).catch((error) => {
+                document.getElementById('loading-screen').style.display = 'none';
                 console.error("Erreur lors de la lecture des données:", error);
                 alert("Erreur lors de la vérification du créneau: " + error.message);
             });
         });
+
+        // Vérifier la disponibilité au chargement de la page
+        window.addEventListener('DOMContentLoaded', checkAvailability);
     </script>
 </body>
 </html>
-
