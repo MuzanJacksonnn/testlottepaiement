@@ -4,30 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Planning des Réservations</title>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 </head>
 <body>
     <h1>Admin - Planning des Réservations</h1>
-    <div id="admin-content" style="display: none;">
-        <h2>Planning des réservations</h2>
-        <table id="reservation-table" border="1">
-            <thead>
-                <tr>
-                    <th>Créneau horaire</th>
-                    <th>Statut</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Les créneaux seront insérés ici -->
-            </tbody>
-        </table>
-    </div>
+    <div id="reservation-list"></div>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+
+    <!-- Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
 
     <script>
         // Configuration Firebase
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
             authDomain: "TON_PROJECT_ID.firebaseapp.com",
             databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
@@ -36,50 +26,32 @@
             messagingSenderId: "791634146132",
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
+
+        // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        var database = firebase.database();
 
-        // Vérifier si l'utilisateur est connecté
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Si connecté, afficher le contenu admin
-                document.getElementById('admin-content').style.display = 'block';
-                displayReservations();  // Appeler la fonction pour afficher les réservations
-            } else {
-                // Si non connecté, rediriger vers la page de login
-                window.location.href = "login.html";
-            }
-        });
-
-        // Fonction pour afficher le planning
+        // Récupérer et afficher les réservations
         function displayReservations() {
-            const timeSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30"];
-            const tableBody = document.querySelector('#reservation-table tbody');
-            tableBody.innerHTML = ''; // Réinitialise le tableau
+            var reservationListRef = database.ref('bookings');
+            reservationListRef.once('value', function(snapshot) {
+                var reservationList = document.getElementById('reservation-list');
+                var bookings = snapshot.val();
+                var output = "<ul>";
 
-            timeSlots.forEach(timeSlot => {
-                const timeSlotRef = firebase.database().ref('bookings/' + timeSlot);
-                timeSlotRef.once('value', (snapshot) => {
-                    const bookings = snapshot.val() || 0;
+                for (var timeSlot in bookings) {
+                    output += "<li>" + timeSlot + ": " + bookings[timeSlot] + " réservations</li>";
+                }
 
-                    const row = document.createElement('tr');
-                    const timeCell = document.createElement('td');
-                    const statusCell = document.createElement('td');
-                    
-                    timeCell.textContent = timeSlot + " - " + (parseInt(timeSlot.split(":")[0], 10) + 1) + ":00";
-                    statusCell.textContent = bookings + " réservations";
-                    
-                    if (bookings >= 3) {
-                        statusCell.style.color = 'red';
-                        statusCell.textContent += " (Complet)";
-                    }
-                    
-                    row.appendChild(timeCell);
-                    row.appendChild(statusCell);
-                    tableBody.appendChild(row);
-                });
+                output += "</ul>";
+                reservationList.innerHTML = output;
             });
         }
+
+        // Afficher les réservations dès le chargement
+        window.onload = function() {
+            displayReservations();
+        };
     </script>
 </body>
 </html>
