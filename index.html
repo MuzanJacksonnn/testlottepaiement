@@ -203,42 +203,10 @@
     color: #022641;">
     ⏳ Envoi en cours, veuillez patienter...
 </div>
-    <script>
-document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
-    event.preventDefault(); // Empêche l'envoi classique du formulaire
-
-    // Afficher immédiatement l'écran de chargement
-    document.getElementById('loading-screen').style.display = 'flex';
-
-    var formData = new FormData(event.target);
-
-    fetch(event.target.action, {
-        method: 'POST',
-        body: formData,
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Réponse du serveur:', data);
-        if (data.result === 'success') {
-            // Redirection vers la page de paiement avec les informations sur l'inclusion des produits
-            const inclusionProduits = document.querySelector('input[name="inclusion_produits"]:checked').value;
-            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
-        } else {
-            throw new Error('Erreur lors de l\'envoi. Veuillez vérifier vos informations.');
-        }
-    })
-    .catch(error => {
-        console.error('Erreur réseau ou serveur:', error);
-        alert('Une erreur est survenue. Vérifiez votre connexion ou réessayez plus tard.');
-        document.getElementById('loading-screen').style.display = 'none'; // Cacher l'écran en cas d'erreur
-    });
-});
-    </script>
-    <script type="module">
+   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    // Configuration Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
         authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
@@ -251,37 +219,40 @@ document.getElementById('buyer-meeting').addEventListener('submit', function(eve
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
-    // Capture de la soumission du formulaire
     document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
-        event.preventDefault(); // Empêcher l'envoi classique du formulaire
+        event.preventDefault();
         const formData = new FormData(event.target);
+
+        // Générer un identifiant unique (par exemple, à partir de l'email)
+        const email = formData.get('email');
+        const companyId = btoa(email); // Crée un identifiant unique à partir de l'email (encodé en base64)
 
         const companyData = {
             nom_complet: formData.get('nom_complet'),
             nom_entreprise: formData.get('nom_entreprise'),
-            nom_marque: formData.get('nom_marque'),
-            email: formData.get('email'),
+            email: email,
             telephone: formData.get('telephone'),
             type_produits: formData.get('type_produits'),
             importateur_distributeur: formData.get('importateur_distributeur'),
             nom_importateur: formData.get('nom_importateur'),
-            inclusion_produits: formData.get('inclusion_produits'),
+            inclusion_produits: formData.get('inclusion_produits')
         };
 
-        // Enregistrer les données de l'entreprise dans Firebase
-        const newCompanyRef = ref(database, 'companies/' + formData.get('nom_entreprise'));
-        set(newCompanyRef, companyData)
+        // Enregistrer l'entreprise dans Firebase sous 'companies/{companyId}'
+        set(ref(database, 'companies/' + companyId), companyData)
         .then(() => {
-            console.log('Données de l\'entreprise enregistrées avec succès');
-            // Redirection vers la page de paiement après l'enregistrement
+            console.log("Données de l'entreprise enregistrées avec succès");
+
+            // Rediriger vers la page de paiement avec l'identifiant de l'entreprise
             const inclusionProduits = formData.get('inclusion_produits');
-            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
+            window.location.href = '/paiement.html?companyId=' + companyId + '&inclusion_produits=' + inclusionProduits;
         })
         .catch(error => {
-            console.error('Erreur lors de l\'enregistrement:', error);
+            console.error("Erreur lors de l'enregistrement de l'entreprise :", error);
         });
     });
 </script>
+
 
 </body>
 </html>
