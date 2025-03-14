@@ -4,32 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Réservation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .time-slot-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .time-slot-btn:hover {
+            background-color: #45a049;
+        }
+
+        .time-slot-btn.selected {
+            background-color: #ff9800;
+        }
+
+        #submit-booking {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-booking:hover {
+            background-color: #0b7dda;
+        }
+    </style>
 </head>
 <body>
     <h1>Réservez un créneau</h1>
-    <div id="booking-form">
-        <label for="time-slot">Choisissez un créneau horaire :</label>
-        <select id="time-slot">
-            <option value="9:00">09:00 - 09:30</option>
-            <option value="9:30">09:30 - 10:00</option>
-            <option value="10:00">10:00 - 10:30</option>
-            <!-- Ajoutez d'autres créneaux ici -->
-            <option value="17:30">17:30 - 18:00</option>
-        </select>
-        <button id="submit-booking">Réserver</button>
+
+    <div class="time-slots" id="time-slots">
+        <button class="time-slot-btn" data-time="9:00">09:00</button>
+        <button class="time-slot-btn" data-time="9:30">09:30</button>
+        <button class="time-slot-btn" data-time="10:00">10:00</button>
+        <!-- Ajoutez d'autres créneaux ici -->
+        <button class="time-slot-btn" data-time="17:30">17:30</button>
     </div>
 
-    <h2>Créneaux réservés :</h2>
-    <ul id="booked-slots"></ul>
+    <button id="submit-booking">Réserver</button>
 
-    <!-- Option 1: Utiliser Firebase v9 avec la syntaxe de modules (recommandé) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-        // Configuration Firebase
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        
         const firebaseConfig = {
-           apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+            apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
             authDomain: "TON_PROJECT_ID.firebaseapp.com",
             databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "lotte-buyer-meeting-9c929",
@@ -38,37 +90,31 @@
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
 
-        // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // Fonction pour récupérer et afficher les créneaux réservés
-        function loadBookedSlots() {
-            const bookedSlotsRef = ref(database, 'bookings/');
-            get(bookedSlotsRef).then((snapshot) => {
-                const bookings = snapshot.val();
-                const bookedSlotsList = document.getElementById('booked-slots');
-                bookedSlotsList.innerHTML = '';  // Efface les créneaux existants avant d'afficher les nouveaux
+        let selectedTimeSlot = null;
 
-                // Affiche les créneaux réservés
-                for (const timeSlot in bookings) {
-                    const count = bookings[timeSlot];
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `${timeSlot} - Réservé par ${count} entreprise(s)`;
-                    bookedSlotsList.appendChild(listItem);
-                }
-            }).catch((error) => {
-                console.error("Erreur lors de la récupération des créneaux réservés :", error);
+        // Ajouter un événement de sélection pour chaque bouton de créneau
+        document.querySelectorAll('.time-slot-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                // Désélectionner les autres boutons
+                document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
+                // Sélectionner ce bouton
+                button.classList.add('selected');
+                // Récupérer la valeur du créneau
+                selectedTimeSlot = button.getAttribute('data-time');
             });
-        }
+        });
 
-        // Charge les créneaux réservés quand la page est chargée
-        document.addEventListener('DOMContentLoaded', loadBookedSlots);
-
-        // Événement sur le bouton de réservation
+        // Gestion du clic sur "Réserver"
         document.getElementById('submit-booking').addEventListener('click', function() {
-            const timeSlot = document.getElementById('time-slot').value;
-            const timeSlotRef = ref(database, 'bookings/' + timeSlot);
+            if (!selectedTimeSlot) {
+                alert('Veuillez sélectionner un créneau horaire.');
+                return;
+            }
+
+            const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
 
             // Vérifier les réservations existantes
             get(timeSlotRef).then((snapshot) => {
@@ -76,10 +122,7 @@
                 if (bookings < 3) {
                     // Ajouter une réservation
                     set(timeSlotRef, bookings + 1)
-                        .then(() => {
-                            alert("Réservation confirmée pour le créneau " + timeSlot);
-                            loadBookedSlots();  // Recharge la liste des créneaux réservés
-                        })
+                        .then(() => alert("Réservation confirmée pour le créneau " + selectedTimeSlot))
                         .catch(error => alert("Erreur lors de la réservation : " + error.message));
                 } else {
                     alert("Désolé, le créneau est complet !");
@@ -92,3 +135,4 @@
     </script>
 </body>
 </html>
+
