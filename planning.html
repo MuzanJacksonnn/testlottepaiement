@@ -3,131 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Planning des Réservations</title>
+    <title>Planning des Réservations</title>
     <style>
-        /* Styles pour le formulaire et la page de planning */
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
         }
-        .container {
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .planning-container {
             width: 80%;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
         }
-        .login-form {
-            display: none;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
         }
-        .planning-content {
-            display: none;
+        table, th, td {
+            border: 1px solid #ddd;
         }
-        #login-error {
-            color: red;
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        td {
+            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Admin - Planning des Réservations</h1>
-
-        <!-- Formulaire de connexion -->
-        <div class="login-form">
-            <h2>Connexion</h2>
-            <form id="login-form">
-                <label for="email">Email :</label>
-                <input type="email" id="email" required>
-                <br>
-                <label for="password">Mot de passe :</label>
-                <input type="password" id="password" required>
-                <br>
-                <button type="submit">Se connecter</button>
-                <p id="login-error"></p>
-            </form>
-        </div>
-
-        <!-- Contenu du planning -->
-        <div class="planning-content">
-            <h2>Planning des créneaux réservés</h2>
-            <div id="planning"></div>
-        </div>
+    <h1>Planning des Réservations</h1>
+    <div class="planning-container">
+        <table id="planning-table">
+            <thead>
+                <tr>
+                    <th>Créneau horaire</th>
+                    <th>Nom de l'entreprise</th>
+                    <th>Email</th>
+                    <th>Type de produits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les créneaux seront insérés ici -->
+            </tbody>
+        </table>
     </div>
 
-    <!-- Scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <!-- Import Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
     <script>
         // Configuration Firebase
-        var firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
-            authDomain: "TON_PROJECT_ID.firebaseapp.com",
+            authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
             databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "lotte-buyer-meeting-9c929",
             storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
             messagingSenderId: "791634146132",
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
-
-        // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // Vérification de l'état de connexion de l'utilisateur
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                // Si l'utilisateur est connecté, afficher le planning
-                document.querySelector('.login-form').style.display = 'none';
-                document.querySelector('.planning-content').style.display = 'block';
-                afficherPlanning();
-            } else {
-                // Sinon, afficher le formulaire de connexion
-                document.querySelector('.login-form').style.display = 'block';
-                document.querySelector('.planning-content').style.display = 'none';
-            }
-        });
+        // Fonction pour charger et afficher le planning
+        function loadPlanning() {
+            const planningTableBody = document.querySelector('#planning-table tbody');
+            planningTableBody.innerHTML = ''; // Réinitialiser le tableau
 
-        // Connexion
-        const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const bookingsRef = firebase.database().ref('bookings');
+            bookingsRef.on('value', function(snapshot) {
+                const bookings = snapshot.val();
 
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Connexion réussie
-                    document.getElementById('login-error').textContent = '';
-                })
-                .catch((error) => {
-                    // En cas d'erreur
-                    document.getElementById('login-error').textContent = error.message;
-                });
-        });
+                // Pour chaque créneau horaire
+                for (const timeSlot in bookings) {
+                    const reservations = bookings[timeSlot];
 
-        // Affichage du planning
-        function afficherPlanning() {
-            const planningDiv = document.getElementById('planning');
-            planningDiv.innerHTML = '';  // Réinitialiser le contenu
-
-            // Récupérer les données de la base de données
-            firebase.database().ref('/reservations').once('value', function(snapshot) {
-                const reservations = snapshot.val();
-                for (const date in reservations) {
-                    const dateDiv = document.createElement('div');
-                    dateDiv.innerHTML = `<h3>${date}</h3>`;
-                    planningDiv.appendChild(dateDiv);
-
-                    for (const time in reservations[date]) {
-                        const slotDiv = document.createElement('div');
-                        slotDiv.innerHTML = `<p>${time} - ${reservations[date][time]}</p>`;
-                        dateDiv.appendChild(slotDiv);
-                    }
+                    reservations.forEach(reservation => {
+                        const row = document.createElement('tr');
+                        
+                        // Ajouter les informations du créneau et de l'entreprise
+                        row.innerHTML = `
+                            <td>${timeSlot}</td>
+                            <td>${reservation.nom_entreprise}</td>
+                            <td>${reservation.email}</td>
+                            <td>${reservation.type_produits}</td>
+                        `;
+                        planningTableBody.appendChild(row);
+                    });
                 }
             });
         }
+
+        // Charger le planning au démarrage
+        loadPlanning();
     </script>
 </body>
 </html>
