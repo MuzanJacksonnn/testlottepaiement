@@ -18,54 +18,49 @@
         </select>
         <button id="submit-booking">Réserver</button>
     </div>
-
-    <!-- Charger Firebase App et Database en premier -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
-    <script>
-        // Attendre que la page soit complètement chargée avant d'exécuter Firebase
-        document.addEventListener("DOMContentLoaded", function() {
-
-            // Configuration Firebase
-            const firebaseConfig = {
-                apiKey: "TON_API_KEY",
-                authDomain: "TON_PROJECT_ID.firebaseapp.com",
-                databaseURL: "https://TON_PROJECT_ID-default-rtdb.firebaseio.com",
-                projectId: "TON_PROJECT_ID",
-                storageBucket: "TON_PROJECT_ID.appspot.com",
-                messagingSenderId: "TON_MESSAGING_SENDER_ID",
-                appId: "TON_APP_ID"
-            };
-
-            // Initialisation de Firebase
-            firebase.initializeApp(firebaseConfig);
-
-            // Référence à la base de données
-            const database = firebase.database();
-
-            // Événement sur le bouton de réservation
-            document.getElementById('submit-booking').addEventListener('click', function() {
-                const timeSlot = document.getElementById('time-slot').value;
-
-                // Enregistrement du créneau dans Firebase
-                const bookingRef = database.ref('bookings/' + timeSlot);
-
-                bookingRef.once('value').then((snapshot) => {
-                    const bookings = snapshot.val() || 0;
-
-                    if (bookings < 3) {
-                        bookingRef.set(bookings + 1)
-                            .then(() => alert("Réservation confirmée pour le créneau " + timeSlot))
-                            .catch(error => alert("Erreur lors de la réservation : " + error.message));
-                    } else {
-                        alert("Désolé, le créneau est complet !");
-                    }
-                });
+    
+    <!-- Option 1: Utiliser Firebase v9 avec la syntaxe de modules (recommandé) -->
+    <script type="module">
+        // Import des fonctions Firebase nécessaires
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+            authDomain: "TON_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.firebaseio.com",
+            projectId: "lotte-buyer-meeting-9c929",
+            storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
+            messagingSenderId: "791634146132",
+            appId: "1:791634146132:web:28160f48220d4778014ec1"
+        };
+        
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        // Événement sur le bouton de réservation
+        document.getElementById('submit-booking').addEventListener('click', function() {
+            const timeSlot = document.getElementById('time-slot').value;
+            const timeSlotRef = ref(database, 'bookings/' + timeSlot);
+            
+            // Vérifier les réservations existantes
+            get(timeSlotRef).then((snapshot) => {
+                const bookings = snapshot.val() || 0;
+                if (bookings < 3) {
+                    // Ajouter une réservation
+                    set(timeSlotRef, bookings + 1)
+                        .then(() => alert("Réservation confirmée pour le créneau " + timeSlot))
+                        .catch(error => alert("Erreur lors de la réservation : " + error.message));
+                } else {
+                    alert("Désolé, le créneau est complet !");
+                }
+            }).catch((error) => {
+                console.error("Erreur lors de la lecture des données:", error);
+                alert("Erreur lors de la vérification du créneau: " + error.message);
             });
-
         });
     </script>
 </body>
 </html>
-
