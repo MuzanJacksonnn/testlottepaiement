@@ -234,5 +234,54 @@ document.getElementById('buyer-meeting').addEventListener('submit', function(eve
     });
 });
     </script>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+    // Configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+        authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
+        databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "lotte-buyer-meeting-9c929",
+        storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
+        messagingSenderId: "791634146132",
+        appId: "1:791634146132:web:28160f48220d4778014ec1"
+    };
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    // Capture de la soumission du formulaire
+    document.getElementById('buyer-meeting').addEventListener('submit', function(event) {
+        event.preventDefault(); // Empêcher l'envoi classique du formulaire
+        const formData = new FormData(event.target);
+
+        const companyData = {
+            nom_complet: formData.get('nom_complet'),
+            nom_entreprise: formData.get('nom_entreprise'),
+            nom_marque: formData.get('nom_marque'),
+            email: formData.get('email'),
+            telephone: formData.get('telephone'),
+            type_produits: formData.get('type_produits'),
+            importateur_distributeur: formData.get('importateur_distributeur'),
+            nom_importateur: formData.get('nom_importateur'),
+            inclusion_produits: formData.get('inclusion_produits'),
+        };
+
+        // Enregistrer les données de l'entreprise dans Firebase
+        const newCompanyRef = ref(database, 'companies/' + formData.get('nom_entreprise'));
+        set(newCompanyRef, companyData)
+        .then(() => {
+            console.log('Données de l\'entreprise enregistrées avec succès');
+            // Redirection vers la page de paiement après l'enregistrement
+            const inclusionProduits = formData.get('inclusion_produits');
+            window.location.href = '/paiement.html?inclusion_produits=' + inclusionProduits;
+        })
+        .catch(error => {
+            console.error('Erreur lors de l\'enregistrement:', error);
+        });
+    });
+</script>
+
 </body>
 </html>
