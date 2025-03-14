@@ -7,53 +7,55 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
+            background-color: #f1f1f1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh;
+            margin: 0;
         }
         .form-container {
-            background-color: #fff;
+            background-color: white;
             padding: 30px;
             border: 2px solid #022641;
             border-radius: 10px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 350px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
         }
         h1 {
-            text-align: center;
             color: #022641;
-            margin-bottom: 10px;
+            font-size: 22px;
+            margin-bottom: 20px;
         }
-        .time-slot-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
+        label {
+            font-size: 16px;
+            color: #022641;
+            display: block;
+            margin-bottom: 8px;
+        }
+        select, input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: #f9f9f9;
         }
         button {
-            background-color: #022641;
+            background-color: #d31444;
             color: white;
             padding: 12px;
             border: none;
-            border-radius: 50%;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s;
-            width: 80px;
-            height: 80px;
+            width: 100%;
         }
         button:hover {
             background-color: #b01138;
-            transform: scale(1.1);
-        }
-        button.selected {
-            background-color: #d31444;
         }
     </style>
 </head>
