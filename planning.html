@@ -7,15 +7,40 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f9f9f9;
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #022641;
+            margin-top: 30px;
         }
         .planning-container {
-            width: 80%;
+            width: 90%;
+            max-width: 1200px;
             margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            border: 2px solid #022641;
+            position: relative;
+        }
+        .planning-container:before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .planning-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -20px -20px -20px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
         }
         table {
             width: 100%;
@@ -30,11 +55,41 @@
             text-align: center;
         }
         th {
-            background-color: #4CAF50;
+            background-color: #022641;
             color: white;
+            font-weight: bold;
         }
         td {
             background-color: #f9f9f9;
+        }
+        tr:hover td {
+            background-color: #f0f0f0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .planning-container {
+                width: 95%;
+                padding: 15px;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -53,16 +108,18 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Les créneaux réservés seront insérés ici -->
+                <tr>
+                    <td colspan="6" class="loading">Chargement des réservations...</td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Import Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
-    <script>
+    <script type="module">
+        // Import des fonctions Firebase nécessaires
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
@@ -75,49 +132,75 @@
         };
 
         // Initialisation de Firebase
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         // Fonction pour charger et afficher le planning
         function loadPlanning() {
             const planningTableBody = document.querySelector('#planning-table tbody');
-            planningTableBody.innerHTML = ''; // Réinitialiser le tableau
-
-            const bookingsRef = database.ref('bookings');
+            const bookingsRef = ref(database, 'bookings');
 
             // Récupérer les réservations depuis Firebase et les afficher dans le tableau
-            bookingsRef.on('value', function(snapshot) {
+            onValue(bookingsRef, (snapshot) => {
+                // Réinitialiser le tableau
+                planningTableBody.innerHTML = ''; 
+                
                 const bookings = snapshot.val();
-                console.log("Données des réservations récupérées :", bookings);  // Log pour vérifier les données
-
-                if (bookings) {
+                console.log("Données des réservations récupérées :", bookings);
+                
+                if (bookings && Object.keys(bookings).length > 0) {
+                    // Trier les créneaux horaires
+                    const timeSlots = Object.keys(bookings).sort();
+                    
                     // Parcourir chaque créneau
-                    for (const timeSlot in bookings) {
-                        const reservation = bookings[timeSlot];
-
-                        console.log("Créneau :", timeSlot, "Réservation :", reservation);
-
-                        const row = document.createElement('tr');
-
-                        // Ajouter les informations du créneau et de l'entreprise dans le tableau
-                        row.innerHTML = `
-                            <td>${timeSlot}</td>
-                            <td>${reservation.nom_entreprise || 'N/A'}</td>
-                            <td>${reservation.nom_complet || 'N/A'}</td>
-                            <td>${reservation.email || 'N/A'}</td>
-                            <td>${reservation.telephone || 'N/A'}</td>
-                            <td>${reservation.type_produits || 'N/A'}</td>
-                        `;
-                        planningTableBody.appendChild(row);
-                    }
+                    timeSlots.forEach(timeSlot => {
+                        const reservationData = bookings[timeSlot];
+                        
+                        // Vérifier si nous avons un nombre ou un objet avec des données utilisateur
+                        if (typeof reservationData === 'object' && reservationData !== null) {
+                            // C'est un objet avec des données utilisateur
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${timeSlot}</td>
+                                <td>${reservationData.nom_entreprise || 'N/A'}</td>
+                                <td>${reservationData.nom_complet || 'N/A'}</td>
+                                <td>${reservationData.email || 'N/A'}</td>
+                                <td>${reservationData.telephone || 'N/A'}</td>
+                                <td>${reservationData.type_produits || 'N/A'}</td>
+                            `;
+                            planningTableBody.appendChild(row);
+                        } else {
+                            // C'est un simple compteur
+                            const count = reservationData;
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${timeSlot}</td>
+                                <td colspan="5">Réservé (${count} place(s) prise(s))</td>
+                            `;
+                            planningTableBody.appendChild(row);
+                        }
+                    });
                 } else {
+                    // Aucune réservation trouvée
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="6" class="empty-message">Aucune réservation n'a été effectuée pour le moment.</td>
+                    `;
+                    planningTableBody.appendChild(emptyRow);
                     console.log("Aucune réservation trouvée.");
                 }
+            }, (error) => {
+                console.error("Erreur lors de la récupération des données :", error);
+                planningTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="color: red;">Erreur lors du chargement des données. Veuillez rafraîchir la page.</td>
+                    </tr>
+                `;
             });
         }
 
         // Charger le planning au démarrage
-        loadPlanning();
+        document.addEventListener('DOMContentLoaded', loadPlanning);
     </script>
 </body>
 </html>
