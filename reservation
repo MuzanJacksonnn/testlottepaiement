@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation de créneaux</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .reservation-container {
+            background-color: #fff;
+            padding: 30px;
+            border: 2px solid #022641;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #022641;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #022641;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #022641;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #d31444;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="reservation-container">
+        <h1>Réservez votre créneau</h1>
+        <form id="reservation-form">
+            <label for="date">Choisissez une date :</label>
+            <input type="date" id="date" name="date" required>
+
+            <label for="time-slot">Choisissez un créneau :</label>
+            <select id="time-slot" name="time-slot" required>
+                <option value="9:00">9:00 - 9:30</option>
+                <option value="9:30">9:30 - 10:00</option>
+                <option value="10:00">10:00 - 10:30</option>
+                <!-- Ajouter les autres créneaux ici -->
+                <option value="11:30">11:30 - 12:00</option>
+                <option value="13:00">13:00 - 13:30</option>
+                <!-- Continuer jusqu'à 18:00 -->
+            </select>
+
+            <button type="submit">Réserver</button>
+        </form>
+    </div>
+</body>
+</html>
