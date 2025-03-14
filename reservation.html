@@ -169,73 +169,74 @@
         });
 
         // Remplacement de l'événement de validation du créneau
-        document.getElementById('validate-button').addEventListener('click', function() {
-            if (selectedSlot) {
-                const slotContainer = selectedSlot.parentElement;
-                const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
-                const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
-                
-                if (currentCount < maxCount) {
-                    // Récupérer l'email depuis l'URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const email = urlParams.get('email');
-                    
-                    if (!email) {
-    // Pour le test, vous pouvez remplacer l'alerte par une valeur par défaut ou un email fictif
-    // alert('Erreur: Impossible d\'identifier votre inscription.');
-    // return;
-    email = 'test@example.com'; // Email par défaut pour les tests
-}
-
-                    }
-                    
-                    // Récupérer le créneau horaire sélectionné
-                    const timeSlot = selectedSlot.textContent;
-                    
-                    // Afficher un indicateur de chargement
-                    document.body.innerHTML += '<div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; font-size: 24px;">Réservation en cours...</div>';
-                    
-                    // Envoyer la réservation au script Google
-                    fetch('https://script.google.com/macros/s/AKfycbzzfGezwuf6tF3HQ4s0tkXbIubF0MbzZxr40ly05U7u08H0rpAiyfg05FX5V_v6NLUn/exec', {
-                        method: 'POST',
-                        body: new URLSearchParams({
-                            'action': 'reserve_slot',
-                            'email': email,
-                            'timeSlot': timeSlot
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('loading').remove();
-                        
-                        if (data.result === 'success') {
-                            slotContainer.setAttribute('data-count', currentCount + 1);
-                            if (currentCount + 1 >= maxCount) {
-                                selectedSlot.classList.add('full');
-                            }
-                            alert('Créneau réservé avec succès !');
-                            
-                            // Désactiver le bouton de validation après réservation
-                            document.getElementById('validate-button').disabled = true;
-                            // Réinitialiser la sélection
-                            selectedSlot.classList.remove('selected');
-                            selectedSlot = null;
-                        } else {
-                            alert('Erreur: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        document.getElementById('loading').remove();
-                        console.error('Erreur:', error);
-                        alert('Une erreur est survenue lors de la réservation. Veuillez réessayer.');
-                    });
-                } else {
-                    alert('Ce créneau est complet.');
-                }
-            } else {
-                alert('Veuillez sélectionner un créneau.');
+   // Remplacement de l'événement de validation du créneau
+document.getElementById('validate-button').addEventListener('click', function() {
+    if (selectedSlot) {
+        const slotContainer = selectedSlot.parentElement;
+        const currentCount = parseInt(slotContainer.getAttribute('data-count'), 10);
+        const maxCount = parseInt(slotContainer.getAttribute('data-max'), 10);
+        
+        if (currentCount < maxCount) {
+            // Récupérer l'email depuis l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            let email = urlParams.get('email');
+            
+            // Vérifier si l'email est absent et utiliser un email par défaut pour les tests
+            if (!email) {
+                // Pour le test, vous pouvez remplacer l'alerte par une valeur par défaut ou un email fictif
+                // alert('Erreur: Impossible d\'identifier votre inscription.');
+                // return;
+                email = 'test@example.com'; // Email par défaut pour les tests
             }
-        });
+
+            // Récupérer le créneau horaire sélectionné
+            const timeSlot = selectedSlot.textContent;
+            
+            // Afficher un indicateur de chargement
+            document.body.innerHTML += '<div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: flex; justify-content: center; align-items: center; font-size: 24px;">Réservation en cours...</div>';
+            
+            // Envoyer la réservation au script Google
+            fetch('https://script.google.com/macros/s/AKfycbzzfGezwuf6tF3HQ4s0tkXbIubF0MbzZxr40ly05U7u08H0rpAiyfg05FX5V_v6NLUn/exec', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'action': 'reserve_slot',
+                    'email': email,
+                    'timeSlot': timeSlot
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loading').remove();
+                
+                if (data.result === 'success') {
+                    slotContainer.setAttribute('data-count', currentCount + 1);
+                    if (currentCount + 1 >= maxCount) {
+                        selectedSlot.classList.add('full');
+                    }
+                    alert('Créneau réservé avec succès !');
+                    
+                    // Désactiver le bouton de validation après réservation
+                    document.getElementById('validate-button').disabled = true;
+                    // Réinitialiser la sélection
+                    selectedSlot.classList.remove('selected');
+                    selectedSlot = null;
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loading').remove();
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue lors de la réservation. Veuillez réessayer.');
+            });
+        } else {
+            alert('Ce créneau est complet.');
+        }
+    } else {
+        alert('Veuillez sélectionner un créneau.');
+    }
+});
+
     </script>
 </body>
 </html>
