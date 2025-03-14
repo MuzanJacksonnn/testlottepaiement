@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning des Réservations</title>
+    <!-- Ajout de la bibliothèque SheetJS pour l'export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            color: #022641;
+            margin-top: 30px;
+        }
+        .planning-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            border: 2px solid #022641;
+            position: relative;
+        }
+        .planning-container:before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .planning-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -20px -20px -20px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #022641;
+            color: white;
+            font-weight: bold;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        tr:hover td {
+            background-color: #f0f0f0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+        .export-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #022641;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .export-btn:hover {
+            background-color: #033b63;
+        }
+        .export-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .buttons-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .planning-container {
+                width: 95%;
+                padding: 15px;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .export-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Planning des Réservations</h1>
+    <div class="planning-container">
+        <div class="buttons-container">
+            <button id="export-excel" class="export-btn" disabled>Télécharger en Excel</button>
+        </div>
+        <table id="planning-table">
+            <thead>
+                <tr>
+                    <th>Créneau horaire</th>
+                    <th>Nom de l'entreprise</th>
+                    <th>Nom complet</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Type de produits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="6" class="loading">Chargement des réservations...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script type="module">
+     // Import des fonctions Firebase nécessaires
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+            authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
+            databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "lotte-buyer-meeting-9c929",
+            storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
+            messagingSenderId: "791634146132",
+            appId: "1:791634146132:web:28160f48220d4778014ec1"
+        };
+
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth(app);
+        
+        // Variable pour stocker les données de réservation pour l'export Excel
+        let bookingsData = [];
+
+        // Éléments DOM
+        const loginSection = document.getElementById('login-section');
+        const planningSection = document.getElementById('planning-section');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('login-btn');
+        const logoutButton = document.getElementById('logout-btn');
+        const loginError = document.getElementById('login-error');
+        const userEmailSpan = document.getElementById('user-email');
+        const exportButton = document.getElementById('export-excel');
+        const planningTableBody = document.querySelector('#planning-table tbody');
+
+        // Gérer l'état de l'authentification
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Utilisateur connecté
+                loginSection.style.display = 'none';
+                planningSection.style.display = 'block';
+                userEmailSpan.textContent = user.email;
+                loadPlanning();
+            } else {
+                // Utilisateur non connecté
+                loginSection.style.display = 'block';
+                planningSection.style.display = 'none';
+                userEmailSpan.textContent = '';
+                planningTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="loading">Connexion requise pour afficher les réservations...</td>
+                    </tr>
+                `;
+            }
+        });
+
+        // Fonction de connexion
+        loginButton.addEventListener('click', () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                loginError.textContent = "Veuillez saisir votre email et votre mot de passe.";
+                return;
+            }
+            
+            loginError.textContent = "Connexion en cours...";
+            
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Connexion réussie
+                    loginError.textContent = "";
+                    emailInput.value = "";
+                    passwordInput.value = "";
+                })
+                .catch((error) => {
+                    // Erreur de connexion
+                    console.error("Erreur de connexion:", error);
+                    switch(error.code) {
+                        case 'auth/invalid-email':
+                            loginError.textContent = "Format d'email invalide.";
+                            break;
+                        case 'auth/user-not-found':
+                        case 'auth/wrong-password':
+                            loginError.textContent = "Email ou mot de passe incorrect.";
+                            break;
+                        case 'auth/too-many-requests':
+                            loginError.textContent = "Trop de tentatives. Veuillez réessayer plus tard.";
+                            break;
+                        default:
+                            loginError.textContent = "Erreur de connexion. Veuillez réessayer.";
+                    }
+                });
+        });
+
+        // Fonction de déconnexion
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).catch((error) => {
+                console.error("Erreur lors de la déconnexion:", error);
+                alert("Erreur lors de la déconnexion. Veuillez réessayer.");
+            });
+        });
+
+        // Fonction pour charger et afficher le planning
+        function loadPlanning() {
+            const planningTableBody = document.querySelector('#planning-table tbody');
+            const exportButton = document.getElementById('export-excel');
+            const bookingsRef = ref(database, 'bookings');
+
+            // Récupérer les réservations depuis Firebase et les afficher dans le tableau
+            onValue(bookingsRef, (snapshot) => {
+                // Réinitialiser le tableau et les données
+                planningTableBody.innerHTML = ''; 
+                bookingsData = [];
+                
+                const bookings = snapshot.val();
+                console.log("Données des réservations récupérées :", bookings);
+                
+                if (bookings && Object.keys(bookings).length > 0) {
+                    // Activer le bouton d'export
+                    exportButton.disabled = false;
+                    
+                    // Trier les créneaux horaires
+                    const timeSlots = Object.keys(bookings).sort();
+                    
+                    // Parcourir chaque créneau
+                    timeSlots.forEach(timeSlot => {
+                        const timeSlotData = bookings[timeSlot];
+                        
+                        // Vérifier si nous avons un objet contenant des réservations
+                        if (typeof timeSlotData === 'object' && timeSlotData !== null) {
+                            // Parcourir les réservations dans ce créneau horaire
+                            Object.keys(timeSlotData).forEach(bookingKey => {
+                                const reservationData = timeSlotData[bookingKey];
+                                
+                                if (typeof reservationData === 'object' && reservationData !== null) {
+                                    // Ajouter à notre tableau de données pour l'export Excel
+                                    bookingsData.push({
+                                        "Créneau horaire": timeSlot,
+                                        "Nom de l'entreprise": reservationData.nom_entreprise || 'N/A',
+                                        "Nom complet": reservationData.nom_complet || 'N/A',
+                                        "Email": reservationData.email || 'N/A',
+                                        "Téléphone": reservationData.telephone || 'N/A',
+                                        "Type de produits": reservationData.type_produits || 'N/A'
+                                    });
+                                    
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${timeSlot}</td>
+                                        <td>${reservationData.nom_entreprise || 'N/A'}</td>
+                                        <td>${reservationData.nom_complet || 'N/A'}</td>
+                                        <td>${reservationData.email || 'N/A'}</td>
+                                        <td>${reservationData.telephone || 'N/A'}</td>
+                                        <td>${reservationData.type_produits || 'N/A'}</td>
+                                    `;
+                                    planningTableBody.appendChild(row);
+                                }
+                            });
+                        } else if (typeof timeSlotData === 'number') {
+                            // C'est un simple compteur
+                            const count = timeSlotData;
+                            
+                            // Ajouter à notre tableau de données pour l'export Excel
+                            bookingsData.push({
+                                "Créneau horaire": timeSlot,
+                                "Nom de l'entreprise": `Réservé (${count} place(s) prise(s))`,
+                                "Nom complet": "-",
+                                "Email": "-",
+                                "Téléphone": "-",
+                                "Type de produits": "-"
+                            });
+                            
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${timeSlot}</td>
+                                <td colspan="5">Réservé (${count} place(s) prise(s))</td>
+                            `;
+                            planningTableBody.appendChild(row);
+                        }
+                    });
+                } else {
+                    // Aucune réservation trouvée
+                    exportButton.disabled = true;
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="6" class="empty-message">Aucune réservation n'a été effectuée pour le moment.</td>
+                    `;
+                    planningTableBody.appendChild(emptyRow);
+                    console.log("Aucune réservation trouvée.");
+                }
+            }, (error) => {
+                console.error("Erreur lors de la récupération des données :", error);
+                exportButton.disabled = true;
+                planningTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="color: red;">Erreur lors du chargement des données. Veuillez rafraîchir la page.</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Fonction pour exporter les données en Excel
+        function exportToExcel() {
+            if (bookingsData.length === 0) {
+                alert("Aucune donnée à exporter.");
+                return;
+            }
+            
+            // Créer un nouveau classeur
+            const workbook = XLSX.utils.book_new();
+            
+            // Créer une feuille de calcul à partir des données
+            const worksheet = XLSX.utils.json_to_sheet(bookingsData);
+            
+            // Ajouter la feuille au classeur
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Réservations");
+            
+            // Générer le fichier Excel et le télécharger
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+            XLSX.writeFile(workbook, `Planning_Réservations_${dateStr}.xlsx`);
+        }
+
+        // Charger le planning au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPlanning();
+            
+            // Ajouter l'événement de clic au bouton d'export
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+        });
+    </script>
+</body>
+</html>
