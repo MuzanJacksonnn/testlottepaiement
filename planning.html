@@ -154,24 +154,30 @@
                     
                     // Parcourir chaque créneau
                     timeSlots.forEach(timeSlot => {
-                        const reservationData = bookings[timeSlot];
+                        const timeSlotData = bookings[timeSlot];
                         
-                        // Vérifier si nous avons un nombre ou un objet avec des données utilisateur
-                        if (typeof reservationData === 'object' && reservationData !== null) {
-                            // C'est un objet avec des données utilisateur
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${timeSlot}</td>
-                                <td>${reservationData.nom_entreprise || 'N/A'}</td>
-                                <td>${reservationData.nom_complet || 'N/A'}</td>
-                                <td>${reservationData.email || 'N/A'}</td>
-                                <td>${reservationData.telephone || 'N/A'}</td>
-                                <td>${reservationData.type_produits || 'N/A'}</td>
-                            `;
-                            planningTableBody.appendChild(row);
-                        } else {
+                        // Vérifier si nous avons un objet contenant des réservations
+                        if (typeof timeSlotData === 'object' && timeSlotData !== null) {
+                            // Parcourir les réservations dans ce créneau horaire
+                            Object.keys(timeSlotData).forEach(bookingKey => {
+                                const reservationData = timeSlotData[bookingKey];
+                                
+                                if (typeof reservationData === 'object' && reservationData !== null) {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td>${timeSlot}</td>
+                                        <td>${reservationData.nom_entreprise || 'N/A'}</td>
+                                        <td>${reservationData.nom_complet || 'N/A'}</td>
+                                        <td>${reservationData.email || 'N/A'}</td>
+                                        <td>${reservationData.telephone || 'N/A'}</td>
+                                        <td>${reservationData.type_produits || 'N/A'}</td>
+                                    `;
+                                    planningTableBody.appendChild(row);
+                                }
+                            });
+                        } else if (typeof timeSlotData === 'number') {
                             // C'est un simple compteur
-                            const count = reservationData;
+                            const count = timeSlotData;
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${timeSlot}</td>
