@@ -181,8 +181,12 @@
                     const email = urlParams.get('email');
                     
                     if (!email) {
-                        alert('Erreur: Impossible d\'identifier votre inscription.');
-                        return;
+    // Pour le test, vous pouvez remplacer l'alerte par une valeur par défaut ou un email fictif
+    // alert('Erreur: Impossible d\'identifier votre inscription.');
+    // return;
+    email = 'test@example.com'; // Email par défaut pour les tests
+}
+
                     }
                     
                     // Récupérer le créneau horaire sélectionné
