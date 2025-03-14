@@ -142,7 +142,7 @@ onApprove: function(data, actions) {
         // Envoyer la confirmation du paiement à Google Sheets
         const email = urlParams.get('email'); // Récupérer l'email depuis l'URL
         // Envoi des données de paiement au script
-        fetch('https://script.google.com/macros/s/AKfycbzzfGezwuf6tF3HQ4s0tkXbIubF0MbzZxr40ly05U7u08H0rpAiyfg05FX5V_v6NLUn/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbxGC9brPK5-CYMI3TNYzmzCz4UvG71K6Oy5Ly3SW2G4C5HWaMKMsjgdPuHXd5vd5t1g/exec', {
             method: 'POST',
             body: new URLSearchParams({
                 'action': 'payment_confirmation',
