@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Planning des Réservations</title>
+    <!-- Ajout de la bibliothèque SheetJS pour l'export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -77,6 +79,29 @@
             color: #666;
             font-style: italic;
         }
+        .export-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #022641;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .export-btn:hover {
+            background-color: #033b63;
+        }
+        .export-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .buttons-container {
+            text-align: center;
+            margin: 20px 0;
+        }
         @media (max-width: 768px) {
             .planning-container {
                 width: 95%;
@@ -90,12 +115,19 @@
                 padding: 8px;
                 font-size: 14px;
             }
+            .export-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>Planning des Réservations</h1>
     <div class="planning-container">
+        <div class="buttons-container">
+            <button id="export-excel" class="export-btn" disabled>Télécharger en Excel</button>
+        </div>
         <table id="planning-table">
             <thead>
                 <tr>
@@ -134,21 +166,29 @@
         // Initialisation de Firebase
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
+        
+        // Variable pour stocker les données de réservation pour l'export Excel
+        let bookingsData = [];
 
         // Fonction pour charger et afficher le planning
         function loadPlanning() {
             const planningTableBody = document.querySelector('#planning-table tbody');
+            const exportButton = document.getElementById('export-excel');
             const bookingsRef = ref(database, 'bookings');
 
             // Récupérer les réservations depuis Firebase et les afficher dans le tableau
             onValue(bookingsRef, (snapshot) => {
-                // Réinitialiser le tableau
+                // Réinitialiser le tableau et les données
                 planningTableBody.innerHTML = ''; 
+                bookingsData = [];
                 
                 const bookings = snapshot.val();
                 console.log("Données des réservations récupérées :", bookings);
                 
                 if (bookings && Object.keys(bookings).length > 0) {
+                    // Activer le bouton d'export
+                    exportButton.disabled = false;
+                    
                     // Trier les créneaux horaires
                     const timeSlots = Object.keys(bookings).sort();
                     
@@ -163,6 +203,16 @@
                                 const reservationData = timeSlotData[bookingKey];
                                 
                                 if (typeof reservationData === 'object' && reservationData !== null) {
+                                    // Ajouter à notre tableau de données pour l'export Excel
+                                    bookingsData.push({
+                                        "Créneau horaire": timeSlot,
+                                        "Nom de l'entreprise": reservationData.nom_entreprise || 'N/A',
+                                        "Nom complet": reservationData.nom_complet || 'N/A',
+                                        "Email": reservationData.email || 'N/A',
+                                        "Téléphone": reservationData.telephone || 'N/A',
+                                        "Type de produits": reservationData.type_produits || 'N/A'
+                                    });
+                                    
                                     const row = document.createElement('tr');
                                     row.innerHTML = `
                                         <td>${timeSlot}</td>
@@ -178,6 +228,17 @@
                         } else if (typeof timeSlotData === 'number') {
                             // C'est un simple compteur
                             const count = timeSlotData;
+                            
+                            // Ajouter à notre tableau de données pour l'export Excel
+                            bookingsData.push({
+                                "Créneau horaire": timeSlot,
+                                "Nom de l'entreprise": `Réservé (${count} place(s) prise(s))`,
+                                "Nom complet": "-",
+                                "Email": "-",
+                                "Téléphone": "-",
+                                "Type de produits": "-"
+                            });
+                            
                             const row = document.createElement('tr');
                             row.innerHTML = `
                                 <td>${timeSlot}</td>
@@ -188,6 +249,7 @@
                     });
                 } else {
                     // Aucune réservation trouvée
+                    exportButton.disabled = true;
                     const emptyRow = document.createElement('tr');
                     emptyRow.innerHTML = `
                         <td colspan="6" class="empty-message">Aucune réservation n'a été effectuée pour le moment.</td>
@@ -197,6 +259,7 @@
                 }
             }, (error) => {
                 console.error("Erreur lors de la récupération des données :", error);
+                exportButton.disabled = true;
                 planningTableBody.innerHTML = `
                     <tr>
                         <td colspan="6" style="color: red;">Erreur lors du chargement des données. Veuillez rafraîchir la page.</td>
@@ -205,9 +268,35 @@
             });
         }
 
+        // Fonction pour exporter les données en Excel
+        function exportToExcel() {
+            if (bookingsData.length === 0) {
+                alert("Aucune donnée à exporter.");
+                return;
+            }
+            
+            // Créer un nouveau classeur
+            const workbook = XLSX.utils.book_new();
+            
+            // Créer une feuille de calcul à partir des données
+            const worksheet = XLSX.utils.json_to_sheet(bookingsData);
+            
+            // Ajouter la feuille au classeur
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Réservations");
+            
+            // Générer le fichier Excel et le télécharger
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+            XLSX.writeFile(workbook, `Planning_Réservations_${dateStr}.xlsx`);
+        }
+
         // Charger le planning au démarrage
-        document.addEventListener('DOMContentLoaded', loadPlanning);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPlanning();
+            
+            // Ajouter l'événement de clic au bouton d'export
+            document.getElementById('export-excel').addEventListener('click', exportToExcel);
+        });
     </script>
 </body>
 </html>
-
