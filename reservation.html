@@ -252,8 +252,38 @@
             return;
         }
 
-        // Logique de réservation ici (comme précédemment)
+        import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+// Soumission de la réservation
+document.getElementById('submit-booking').addEventListener('click', function() {
+    if (!selectedTimeSlot) {
+        alert('Veuillez sélectionner un créneau horaire.');
+        return;
+    }
+
+    const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
+
+    // Vérifier le nombre de réservations existantes
+    get(timeSlotRef).then(snapshot => {
+        const bookings = snapshot.val() || [];
+        
+        if (bookings.length >= 3) {
+            alert('Ce créneau est déjà complet.');
+            return;
+        }
+
+        // Ajouter la réservation
+        push(timeSlotRef, {
+            timestamp: new Date().toISOString() // Ajoute la date de réservation
+        }).then(() => {
+            alert('Réservation effectuée avec succès !');
+            location.reload(); // Recharger la page pour mettre à jour les créneaux
+        }).catch(error => {
+            console.error(error);
+            alert('Erreur lors de la réservation. Veuillez réessayer.');
+        });
     });
+});
 </script>
 
 </body>
