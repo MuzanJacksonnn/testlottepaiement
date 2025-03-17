@@ -78,12 +78,12 @@
         </table>
     </div>
 
-    <!-- Import Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <!-- Firebase v9 import -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    <script>
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
@@ -96,9 +96,9 @@
         };
 
         // Initialiser Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
 
         // Gestion de la connexion
         const loginForm = document.getElementById('login-form');
@@ -107,7 +107,7 @@
         const loginBtn = document.getElementById('login-btn');
 
         // Vérifier si l'utilisateur est déjà connecté
-        auth.onAuthStateChanged((user) => {
+        onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginForm.style.display = 'none';
                 planningContent.style.display = 'block';
@@ -123,8 +123,8 @@
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => {
                     loginError.textContent = ''; // Réinitialiser les erreurs
                 })
                 .catch((error) => {
@@ -137,10 +137,10 @@
             const planningTableBody = document.querySelector('#planning-table tbody');
             planningTableBody.innerHTML = ''; // Réinitialiser le tableau
 
-            const bookingsRef = database.ref('bookings');
+            const bookingsRef = ref(database, 'bookings');
 
             // Récupérer les réservations depuis Firebase et les afficher dans le tableau
-            bookingsRef.on('value', function(snapshot) {
+            onValue(bookingsRef, (snapshot) => {
                 const bookings = snapshot.val();
                 console.log("Données des réservations récupérées :", bookings);
 
