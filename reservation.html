@@ -3,270 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Réservation des créneaux - Lotte Buyer Meeting</title>
+    <title>Admin - Planning des Réservations</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .form-container {
-            background-color: #fff;
-            padding: 30px;
-            border: 2px solid #022641;
-            border-radius: 10px;
-            max-width: 600px;
-            width: 100%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            position: relative;
-            text-align: center;
+            background-color: #f5f5f5;
         }
         h1 {
             text-align: center;
-            color: #022641;
-            margin-bottom: 20px;
+            color: #333;
         }
-        .logo-container {
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .login-form {
             text-align: center;
-            margin-bottom: 25px;
         }
-        .logo-container img {
-            max-width: 300px;
-            height: auto;
-        }
-        .date-selection {
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #022641;
-        }
-        input[type="date"] {
-            width: 100%;
+        .login-form input {
             padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #022641;
-            border-radius: 5px;
-            box-sizing: border-box;
+            margin: 10px;
+            width: 100%;
+            max-width: 300px;
         }
-        .time-slots {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 25px;
-        }
-        .time-slot-btn {
-            flex: 0 0 calc(25% - 10px);
-            background-color: #fff;
-            border: 1px solid #022641;
-            border-radius: 5px;
-            padding: 12px 10px;
-            cursor: pointer;
-            font-weight: normal;
-            text-align: center;
-            transition: all 0.2s ease;
-            color: #022641;
-            font-size: 14px;
-        }
-        .time-slot-btn.selected {
-            background-color: #022641;
+        .login-form button {
+            padding: 10px;
+            width: 100%;
+            max-width: 320px;
+            background-color: #4CAF50;
             color: white;
-            border-color: #022641;
-        }
-        button#submit-booking {
-            background-color: #d31444;
-            color: white;
-            padding: 12px 20px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin-top: 15px;
         }
-        button#submit-booking:hover {
-            background-color: #b01138;
+        .login-form button:hover {
+            background-color: #45a049;
         }
-        .form-container:before {
-            content: '';
-            display: block;
-            height: 8px;
-            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
-            margin: -30px -30px 20px -30px;
-            border-radius: 8px 8px 0 0;
-        }
-        .form-container:after {
-            content: '';
-            display: block;
-            height: 8px;
-            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
-            margin: 20px -30px -30px -30px;
-            border-radius: 0 0 8px 8px;
-            position: relative;
-        }
-        #loading-screen {
+        .planning-content {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            font-weight: bold;
-            color: #022641;
-        }
-        @media (max-width: 600px) {
-            .form-container {
-                padding: 20px;
-                margin: 15px;
-            }
-            body {
-                align-items: flex-start;
-                padding: 20px 0;
-            }
-            .time-slot-btn {
-                flex: 0 0 calc(33.33% - 10px);
-            }
-            .form-container:before {
-                margin: -20px -20px 20px -20px;
-            }
-            .form-container:after {
-                margin: 20px -20px -20px -20px;
-            }
-        }
-        @media (max-width: 400px) {
-            .time-slot-btn {
-                flex: 0 0 calc(50% - 10px);
-            }
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h1>Réservation des créneaux</h1>
-        <div class="logo-container">
-            <img src="new logo.jpg" alt="Logo Lotte Buyer Meeting">
-        </div>
-        
-        <div class="date-selection">
-            <label for="meeting-date">Sélectionnez une date :</label>
-            <input type="date" id="meeting-date" value="2025-05-13" min="2025-05-13" max="2025-05-13">
-        </div>
-        
-        <label>Choisissez un créneau horaire :</label>
-        <div class="time-slots" id="time-slots">
-            <button class="time-slot-btn" data-time="09:00">09:00 - 09:30</button>
-            <button class="time-slot-btn" data-time="09:30">09:30 - 10:00</button>
-            <button class="time-slot-btn" data-time="10:00">10:00 - 10:30</button>
-            <button class="time-slot-btn" data-time="10:30">10:30 - 11:00</button>
-            <button class="time-slot-btn" data-time="11:00">11:00 - 11:30</button>
-            <button class="time-slot-btn" data-time="11:30">11:30 - 12:00</button>
-            <button class="time-slot-btn" data-time="14:00">14:00 - 14:30</button>
-            <button class="time-slot-btn" data-time="14:30">14:30 - 15:00</button>
-            <button class="time-slot-btn" data-time="15:00">15:00 - 15:30</button>
-            <button class="time-slot-btn" data-time="15:30">15:30 - 16:00</button>
-            <button class="time-slot-btn" data-time="16:00">16:00 - 16:30</button>
-            <button class="time-slot-btn" data-time="16:30">16:30 - 17:00</button>
-        </div>
+    <h1>Admin - Planning des Réservations</h1>
 
-        <button id="submit-booking">Réserver ce créneau</button>
+    <!-- Formulaire de connexion -->
+    <div class="container login-form" id="login-form">
+        <h2>Connexion</h2>
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="password" placeholder="Mot de passe" required />
+        <button id="login-btn">Se connecter</button>
+        <p id="login-error" style="color: red;"></p>
     </div>
-    
-    <div id="loading-screen">
-        ⏳ Traitement de votre réservation, veuillez patienter...
+
+    <!-- Contenu du planning -->
+    <div class="container planning-content" id="planning-content">
+        <table id="planning-table">
+            <thead>
+                <tr>
+                    <th>Créneau horaire</th>
+                    <th>Nom de l'entreprise</th>
+                    <th>Nom complet</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Type de produits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Les créneaux réservés seront insérés ici -->
+            </tbody>
+        </table>
     </div>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
-        authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
-        databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
-        projectId: "lotte-buyer-meeting-9c929",
-        storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
-        messagingSenderId: "791634146132",
-        appId: "1:791634146132:web:28160f48220d4778014ec1"
-    };
+    <!-- Import Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    <script>
+        // Configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
+            authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
+            databaseURL: "https://lotte-buyer-meeting-9c929-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "lotte-buyer-meeting-9c929",
+            storageBucket: "lotte-buyer-meeting-9c929.appspot.com",
+            messagingSenderId: "791634146132",
+            appId: "1:791634146132:web:28160f48220d4778014ec1"
+        };
 
-    let selectedTimeSlot = null;
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
 
-    // Ajouter un événement de sélection pour chaque bouton de créneau
-    document.querySelectorAll('.time-slot-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            if (button.disabled) return;
+        // Gestion de la connexion
+        const loginForm = document.getElementById('login-form');
+        const planningContent = document.getElementById('planning-content');
+        const loginError = document.getElementById('login-error');
+        const loginBtn = document.getElementById('login-btn');
 
-            document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            selectedTimeSlot = button.getAttribute('data-time');
-        });
-    });
-
-    document.getElementById('submit-booking').addEventListener('click', function() {
-        if (!selectedTimeSlot) {
-            alert('Veuillez sélectionner un créneau horaire.');
-            return;
-        }
-
-        // Récupérer l'identifiant de l'entreprise depuis l'URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const companyId = urlParams.get('companyId');
-
-        // Récupérer les informations de l'entreprise
-        const companyRef = ref(database, 'companies/' + companyId);
-        get(companyRef).then((snapshot) => {
-            const companyData = snapshot.val();
-            if (!companyData) {
-                alert("Erreur : informations de l'entreprise introuvables.");
-                return;
+        // Vérifier si l'utilisateur est déjà connecté
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loginForm.style.display = 'none';
+                planningContent.style.display = 'block';
+                loadPlanning(); // Charger le planning si l'utilisateur est connecté
+            } else {
+                loginForm.style.display = 'block';
+                planningContent.style.display = 'none';
             }
-
-            const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
-
-            // Vérifier les réservations existantes pour ce créneau
-            get(timeSlotRef).then((snapshot) => {
-                const bookings = snapshot.val() || [];
-
-                if (bookings.length < 3) {
-                    // Ajouter l'entreprise au créneau réservé
-                    bookings.push(companyData);
-
-                    // Enregistrer dans Firebase
-                    set(timeSlotRef, bookings)
-                        .then(() => {
-                            alert("Réservation confirmée pour le créneau " + selectedTimeSlot);
-                            window.location.href = "/merci.html";
-                        })
-                        .catch(error => {
-                            console.error("Erreur lors de la réservation :", error);
-                        });
-                } else {
-                    alert("Désolé, le créneau est complet.");
-                }
-            }).catch(error => {
-                console.error("Erreur lors de la récupération des réservations :", error);
-            });
-        }).catch(error => {
-            console.error("Erreur lors de la récupération des données de l'entreprise :", error);
         });
-    });
-</script>
 
+        // Gérer la soumission du formulaire de connexion
+        loginBtn.addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    loginError.textContent = ''; // Réinitialiser les erreurs
+                })
+                .catch((error) => {
+                    loginError.textContent = 'Erreur de connexion : ' + error.message;
+                });
+        });
+
+        // Charger et afficher le planning
+        function loadPlanning() {
+            const planningTableBody = document.querySelector('#planning-table tbody');
+            planningTableBody.innerHTML = ''; // Réinitialiser le tableau
+
+            const bookingsRef = database.ref('bookings');
+
+            // Récupérer les réservations depuis Firebase et les afficher dans le tableau
+            bookingsRef.on('value', function(snapshot) {
+                const bookings = snapshot.val();
+                console.log("Données des réservations récupérées :", bookings);
+
+                if (bookings) {
+                    for (const timeSlot in bookings) {
+                        const reservations = bookings[timeSlot];
+
+                        reservations.forEach(reservation => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${timeSlot}</td>
+                                <td>${reservation.nom_entreprise || 'N/A'}</td>
+                                <td>${reservation.nom_complet || 'N/A'}</td>
+                                <td>${reservation.email || 'N/A'}</td>
+                                <td>${reservation.telephone || 'N/A'}</td>
+                                <td>${reservation.type_produits || 'N/A'}</td>
+                            `;
+                            planningTableBody.appendChild(row);
+                        });
+                    }
+                } else {
+                    console.log("Aucune réservation trouvée.");
+                }
+            });
+        }
+    </script>
 </body>
 </html>
