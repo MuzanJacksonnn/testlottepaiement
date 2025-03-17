@@ -45,6 +45,37 @@
         .planning-content {
             display: none;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        #download-btn {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #download-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +92,7 @@
 
     <!-- Contenu du planning -->
     <div class="container planning-content" id="planning-content">
+        <button id="download-btn">Télécharger en Excel</button>
         <table id="planning-table">
             <thead>
                 <tr>
@@ -83,6 +115,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.17.5/dist/xlsx.full.min.js";
 
         // Configuration Firebase
         const firebaseConfig = {
@@ -166,6 +199,14 @@
                 }
             });
         }
+
+        // Fonction pour télécharger le planning en Excel
+        document.getElementById('download-btn').addEventListener('click', () => {
+            const table = document.getElementById('planning-table');
+            const workbook = XLSX.utils.table_to_book(table);
+            XLSX.writeFile(workbook, 'planning_reservations.xlsx');
+        });
     </script>
 </body>
 </html>
+
