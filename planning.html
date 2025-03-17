@@ -3,47 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Planning des Réservations</title>
+    <title>Planning des Réservations</title>
+    <!-- Ajout de la bibliothèque SheetJS pour l'export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f9f9f9;
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: #022641;
+            margin-top: 30px;
         }
-        .container {
-            width: 80%;
+        .planning-container {
+            width: 90%;
+            max-width: 1200px;
             margin: 20px auto;
-            padding: 20px;
             background-color: white;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            border: 2px solid #022641;
+            position: relative;
         }
-        .login-form {
-            text-align: center;
+        .planning-container:before {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #022641 0%, #022641 50%, #d31444 50%, #d31444 100%);
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
         }
-        .login-form input {
-            padding: 10px;
-            margin: 10px;
-            width: 100%;
-            max-width: 300px;
-        }
-        .login-form button {
-            padding: 10px;
-            width: 100%;
-            max-width: 320px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .login-form button:hover {
-            background-color: #45a049;
-        }
-        .planning-content {
-            display: none;
+        .planning-container:after {
+            content: '';
+            display: block;
+            height: 8px;
+            background: linear-gradient(to right, #d31444 0%, #d31444 50%, #022641 50%, #022641 100%);
+            margin: 20px -20px -20px -20px;
+            border-radius: 0 0 8px 8px;
+            position: relative;
         }
         table {
             width: 100%;
@@ -58,41 +57,77 @@
             text-align: center;
         }
         th {
-            background-color: #4CAF50;
+            background-color: #022641;
             color: white;
+            font-weight: bold;
         }
         td {
             background-color: #f9f9f9;
         }
-        #download-btn {
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #4CAF50;
+        tr:hover td {
+            background-color: #f0f0f0;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+        .empty-message {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+        }
+        .export-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 24px;
+            background-color: #022641;
             color: white;
             border: none;
-            cursor: pointer;
+            border-radius: 5px;
             font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        #download-btn:hover {
-            background-color: #45a049;
+        .export-btn:hover {
+            background-color: #033b63;
+        }
+        .export-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .buttons-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        @media (max-width: 768px) {
+            .planning-container {
+                width: 95%;
+                padding: 15px;
+            }
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            .export-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Admin - Planning des Réservations</h1>
-
-    <!-- Formulaire de connexion -->
-    <div class="container login-form" id="login-form">
-        <h2>Connexion</h2>
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="password" id="password" placeholder="Mot de passe" required />
-        <button id="login-btn">Se connecter</button>
-        <p id="login-error" style="color: red;"></p>
-    </div>
-
-    <!-- Contenu du planning -->
-    <div class="container planning-content" id="planning-content">
-        <button id="download-btn">Télécharger en Excel</button>
+    <h1>Planning des Réservations</h1>
+    <div class="planning-container">
+        <div class="buttons-container">
+            <button id="export-excel" class="export-btn" disabled>Télécharger en Excel</button>
+        </div>
         <table id="planning-table">
             <thead>
                 <tr>
@@ -105,19 +140,21 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Les créneaux réservés seront insérés ici -->
+                <tr>
+                    <td colspan="6" class="loading">Chargement des réservations.</td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Firebase v9 import -->
+    <!-- Script Firebase et Excel -->
     <script type="module">
+        // Import Firebase et initialisation
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-        import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.17.5/dist/xlsx.full.min.js";
+        import * as XLSX from "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
 
-        // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCeNhksyvzK1u5p-R6deAnCfNL_kQDH8uA",
             authDomain: "lotte-buyer-meeting-9c929.firebaseapp.com",
@@ -128,85 +165,74 @@
             appId: "1:791634146132:web:28160f48220d4778014ec1"
         };
 
-        // Initialiser Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
+        let bookingsData = [];
 
-        // Gestion de la connexion
-        const loginForm = document.getElementById('login-form');
-        const planningContent = document.getElementById('planning-content');
-        const loginError = document.getElementById('login-error');
-        const loginBtn = document.getElementById('login-btn');
-
-        // Vérifier si l'utilisateur est déjà connecté
+        // Authentification
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                loginForm.style.display = 'none';
-                planningContent.style.display = 'block';
-                loadPlanning(); // Charger le planning si l'utilisateur est connecté
+                document.querySelector('.planning-container').style.display = 'block';
+                loadPlanning();  // Charger les données après authentification
             } else {
-                loginForm.style.display = 'block';
-                planningContent.style.display = 'none';
+                const email = prompt('Email:');
+                const password = prompt('Mot de passe:');
+                signInWithEmailAndPassword(auth, email, password)
+                    .catch(error => {
+                        alert('Erreur : ' + error.message);
+                    });
             }
         });
 
-        // Gérer la soumission du formulaire de connexion
-        loginBtn.addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            signInWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                    loginError.textContent = ''; // Réinitialiser les erreurs
-                })
-                .catch((error) => {
-                    loginError.textContent = 'Erreur de connexion : ' + error.message;
-                });
-        });
-
-        // Charger et afficher le planning
+        // Charger les réservations
         function loadPlanning() {
             const planningTableBody = document.querySelector('#planning-table tbody');
-            planningTableBody.innerHTML = ''; // Réinitialiser le tableau
-
+            const exportButton = document.getElementById('export-excel');
             const bookingsRef = ref(database, 'bookings');
 
-            // Récupérer les réservations depuis Firebase et les afficher dans le tableau
             onValue(bookingsRef, (snapshot) => {
+                planningTableBody.innerHTML = ''; // Reset du tableau
+                bookingsData = [];
                 const bookings = snapshot.val();
-                console.log("Données des réservations récupérées :", bookings);
 
-                if (bookings) {
-                    for (const timeSlot in bookings) {
-                        const reservations = bookings[timeSlot];
+                if (bookings && Object.keys(bookings).length > 0) {
+                    exportButton.disabled = false;
 
-                        reservations.forEach(reservation => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${timeSlot}</td>
-                                <td>${reservation.nom_entreprise || 'N/A'}</td>
-                                <td>${reservation.nom_complet || 'N/A'}</td>
-                                <td>${reservation.email || 'N/A'}</td>
-                                <td>${reservation.telephone || 'N/A'}</td>
-                                <td>${reservation.type_produits || 'N/A'}</td>
-                            `;
-                            planningTableBody.appendChild(row);
-                        });
-                    }
+                    Object.keys(bookings).forEach(timeSlot => {
+                        const reservation = bookings[timeSlot];
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${timeSlot}</td>
+                            <td>${reservation.nom_entreprise || 'N/A'}</td>
+                            <td>${reservation.nom_complet || 'N/A'}</td>
+                            <td>${reservation.email || 'N/A'}</td>
+                            <td>${reservation.telephone || 'N/A'}</td>
+                            <td>${reservation.type_produits || 'N/A'}</td>
+                        `;
+                        bookingsData.push(reservation);
+                        planningTableBody.appendChild(row);
+                    });
                 } else {
-                    console.log("Aucune réservation trouvée.");
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `<td colspan="6" class="empty-message">Aucune réservation n'a été effectuée.</td>`;
+                    planningTableBody.appendChild(emptyRow);
+                    exportButton.disabled = true;
                 }
             });
         }
 
-        // Fonction pour télécharger le planning en Excel
-        document.getElementById('download-btn').addEventListener('click', () => {
-            const table = document.getElementById('planning-table');
-            const workbook = XLSX.utils.table_to_book(table);
+        // Exporter en Excel
+        document.getElementById('export-excel').addEventListener('click', () => {
+            if (bookingsData.length === 0) {
+                alert('Aucune donnée à exporter.');
+                return;
+            }
+            const worksheet = XLSX.utils.json_to_sheet(bookingsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Réservations');
             XLSX.writeFile(workbook, 'planning_reservations.xlsx');
         });
     </script>
 </body>
 </html>
-
