@@ -151,6 +151,9 @@
                 <!-- Les créneaux réservés seront insérés ici -->
             </tbody>
         </table>
+        
+        <!-- Bouton pour télécharger en Excel -->
+        <button id="export-excel" class="export-btn">Télécharger en Excel</button>
     </div>
 
     <!-- Firebase v9 import -->
@@ -180,6 +183,10 @@
         const planningContent = document.getElementById('planning-content');
         const loginError = document.getElementById('login-error');
         const loginBtn = document.getElementById('login-btn');
+        const exportExcelBtn = document.getElementById('export-excel');
+
+        // Données des réservations pour l'export Excel
+        let bookingsData = [];
 
         // Vérifier si l'utilisateur est déjà connecté
         onAuthStateChanged(auth, (user) => {
@@ -211,6 +218,7 @@
         function loadPlanning() {
             const planningTableBody = document.querySelector('#planning-table tbody');
             planningTableBody.innerHTML = ''; // Réinitialiser le tableau
+            bookingsData = []; // Réinitialiser les données pour l'export
 
             const bookingsRef = ref(database, 'bookings');
 
@@ -234,6 +242,16 @@
                                 <td>${reservation.type_produits || 'N/A'}</td>
                             `;
                             planningTableBody.appendChild(row);
+                            
+                            // Ajouter les données à notre tableau pour l'export Excel
+                            bookingsData.push({
+                                "Créneau horaire": timeSlot,
+                                "Nom de l'entreprise": reservation.nom_entreprise || 'N/A',
+                                "Nom complet": reservation.nom_complet || 'N/A',
+                                "Email": reservation.email || 'N/A',
+                                "Téléphone": reservation.telephone || 'N/A',
+                                "Type de produits": reservation.type_produits || 'N/A'
+                            });
                         });
                     }
                 } else {
@@ -241,6 +259,30 @@
                 }
             });
         }
+
+        // Fonction pour exporter les données en Excel
+        exportExcelBtn.addEventListener('click', () => {
+            if (bookingsData.length === 0) {
+                alert("Aucune donnée à exporter.");
+                return;
+            }
+
+            // Créer un nouveau classeur Excel
+            const workbook = XLSX.utils.book_new();
+            
+            // Convertir les données en feuille Excel
+            const worksheet = XLSX.utils.json_to_sheet(bookingsData);
+            
+            // Ajouter la feuille au classeur
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Réservations");
+            
+            // Générer le fichier Excel et le télécharger
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+            const filename = `Planning_Reservations_${dateStr}.xlsx`;
+            
+            XLSX.writeFile(workbook, filename);
+        });
     </script>
 </body>
 </html>
