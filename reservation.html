@@ -189,9 +189,9 @@
         ⏳ Traitement de votre réservation, veuillez patienter...
     </div>
 
-   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+    import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
     // Configuration Firebase
     const firebaseConfig = {
@@ -203,33 +203,30 @@
         messagingSenderId: "791634146132",
         appId: "1:791634146132:web:28160f48220d4778014ec1"
     };
+
     const app = initializeApp(firebaseConfig);
     const database = getDatabase(app);
 
     let selectedTimeSlot = null;
 
-    // Fonction pour vérifier l'état de chaque créneau
+    // Vérifier l'état des créneaux existants
     function checkTimeSlots() {
         document.querySelectorAll('.time-slot-btn').forEach(button => {
             const timeSlot = button.getAttribute('data-time');
             const timeSlotRef = ref(database, 'bookings/' + timeSlot);
 
-            // Récupérer les réservations pour chaque créneau
             get(timeSlotRef).then(snapshot => {
                 const bookings = snapshot.val() || [];
-
                 if (bookings.length >= 3) {
-                    // Si le créneau est plein, désactiver le bouton et le griser
                     button.disabled = true;
                     button.textContent = `${timeSlot} (Complet)`;
-                    button.style.backgroundColor = '#d3d3d3'; // Griser le bouton
+                    button.style.backgroundColor = '#d3d3d3';
                     button.style.color = '#777';
                 }
             });
         });
     }
 
-    // Appeler la fonction lors du chargement de la page pour vérifier les créneaux pleins
     window.onload = function() {
         checkTimeSlots();
     };
@@ -237,54 +234,43 @@
     // Sélectionner un créneau
     document.querySelectorAll('.time-slot-btn').forEach(button => {
         button.addEventListener('click', function() {
-            if (button.disabled) return;  // Empêcher de sélectionner un créneau complet
-
+            if (button.disabled) return;
             document.querySelectorAll('.time-slot-btn').forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
             selectedTimeSlot = button.getAttribute('data-time');
         });
     });
 
-    // Soumission de la réservation
+    // Soumettre la réservation
     document.getElementById('submit-booking').addEventListener('click', function() {
         if (!selectedTimeSlot) {
             alert('Veuillez sélectionner un créneau horaire.');
             return;
         }
 
-        import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
 
-// Soumission de la réservation
-document.getElementById('submit-booking').addEventListener('click', function() {
-    if (!selectedTimeSlot) {
-        alert('Veuillez sélectionner un créneau horaire.');
-        return;
-    }
+        get(timeSlotRef).then(snapshot => {
+            const bookings = snapshot.val() || [];
+            if (bookings.length >= 3) {
+                alert('Ce créneau est déjà complet.');
+                return;
+            }
 
-    const timeSlotRef = ref(database, 'bookings/' + selectedTimeSlot);
-
-    // Vérifier le nombre de réservations existantes
-    get(timeSlotRef).then(snapshot => {
-        const bookings = snapshot.val() || [];
-        
-        if (bookings.length >= 3) {
-            alert('Ce créneau est déjà complet.');
-            return;
-        }
-
-        // Ajouter la réservation
-        push(timeSlotRef, {
-            timestamp: new Date().toISOString() // Ajoute la date de réservation
-        }).then(() => {
-            alert('Réservation effectuée avec succès !');
-            location.reload(); // Recharger la page pour mettre à jour les créneaux
-        }).catch(error => {
-            console.error(error);
-            alert('Erreur lors de la réservation. Veuillez réessayer.');
+            // Ajouter la réservation
+            push(timeSlotRef, {
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                alert('Réservation effectuée avec succès !');
+                location.reload(); // Recharger pour mettre à jour l'état des créneaux
+            }).catch(error => {
+                console.error(error);
+                alert('Erreur lors de la réservation. Veuillez réessayer.');
+            });
         });
     });
-});
 </script>
+
 
 </body>
 </html>
