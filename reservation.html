@@ -81,6 +81,12 @@
             color: white;
             border-color: #022641;
         }
+        .time-slot-btn.disabled {
+            background-color: #f0f0f0;
+            color: #999999;
+            border-color: #cccccc;
+            cursor: not-allowed;
+        }
         button#submit-booking {
             background-color: #d31444;
             color: white;
@@ -207,6 +213,40 @@
 
     let selectedTimeSlot = null;
 
+    // Fonction pour vérifier la disponibilité des créneaux
+    function checkSlotAvailability() {
+        document.getElementById('loading-screen').style.display = 'flex';
+        
+        // Vérifier chaque créneau horaire
+        const timeSlots = document.querySelectorAll('.time-slot-btn');
+        
+        // Créer un tableau de promesses pour toutes les vérifications
+        const promises = Array.from(timeSlots).map(slot => {
+            const timeSlot = slot.getAttribute('data-time');
+            const timeSlotRef = ref(database, 'bookings/' + timeSlot);
+            
+            return get(timeSlotRef).then((snapshot) => {
+                const bookings = snapshot.val() || [];
+                
+                // Si le créneau est complet (3 réservations)
+                if (bookings.length >= 3) {
+                    // Désactiver et griser le bouton
+                    slot.disabled = true;
+                    slot.classList.add('disabled');
+                    slot.innerHTML = slot.innerHTML + ' <small>(Complet)</small>';
+                }
+            });
+        });
+        
+        // Une fois toutes les vérifications terminées
+        Promise.all(promises).then(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+        }).catch(error => {
+            console.error("Erreur lors de la vérification des créneaux :", error);
+            document.getElementById('loading-screen').style.display = 'none';
+        });
+    }
+
     // Ajouter un événement de sélection pour chaque bouton de créneau
     document.querySelectorAll('.time-slot-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -244,6 +284,9 @@
                 const bookings = snapshot.val() || [];
 
                 if (bookings.length < 3) {
+                    // Afficher l'écran de chargement
+                    document.getElementById('loading-screen').style.display = 'flex';
+                    
                     // Ajouter l'entreprise au créneau réservé
                     bookings.push(companyData);
 
@@ -255,6 +298,7 @@
                         })
                         .catch(error => {
                             console.error("Erreur lors de la réservation :", error);
+                            document.getElementById('loading-screen').style.display = 'none';
                         });
                 } else {
                     alert("Désolé, le créneau est complet.");
@@ -265,6 +309,11 @@
         }).catch(error => {
             console.error("Erreur lors de la récupération des données de l'entreprise :", error);
         });
+    });
+
+    // Vérifier la disponibilité des créneaux au chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        checkSlotAvailability();
     });
 </script>
 
